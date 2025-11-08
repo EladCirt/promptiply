@@ -9,8 +9,14 @@ import { RefinementEngine } from './refinement/engine';
 import { RefineCommands } from './commands/refine';
 import { ProfileCommands } from './commands/profiles';
 import { StatusBarManager } from './ui/statusBar';
+import { HistoryManager } from './history/manager';
+import { HistoryTreeViewProvider } from './history/treeViewProvider';
+import { WebviewPanelManager } from './ui/webviewPanel';
+import { TemplateManager } from './templates/manager';
+import { TemplateCommands } from './commands/templates';
 
 let statusBarManager: StatusBarManager | undefined;
+let historyTreeView: HistoryTreeViewProvider | undefined;
 
 /**
  * Extension activation
@@ -20,14 +26,28 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Initialize managers
   const profileManager = new ProfileManager(context);
+  const historyManager = new HistoryManager(context);
+  const templateManager = new TemplateManager(context);
   const engine = new RefinementEngine(profileManager);
-  const refineCommands = new RefineCommands(engine, profileManager);
+
+  // Initialize commands
+  const refineCommands = new RefineCommands(engine, profileManager, historyManager);
   const profileCommands = new ProfileCommands(profileManager);
+  const templateCommands = new TemplateCommands(templateManager, refineCommands);
+
+  // Initialize webview panel manager
+  WebviewPanelManager.initialize(context);
 
   // Initialize status bar
   statusBarManager = new StatusBarManager(profileManager);
   await statusBarManager.initialize();
   context.subscriptions.push(statusBarManager);
+
+  // Initialize history tree view
+  historyTreeView = new HistoryTreeViewProvider(historyManager);
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider('promptiply.history', historyTreeView)
+  );
 
   // Register commands
   context.subscriptions.push(
@@ -82,6 +102,67 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       'promptiply.viewProfile',
       () => profileCommands.viewProfile()
+    ),
+
+    // Template commands
+    vscode.commands.registerCommand(
+      'promptiply.useTemplate',
+      () => templateCommands.useTemplate()
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.createTemplate',
+      () => templateCommands.createTemplate()
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.manageTemplates',
+      () => templateCommands.manageTemplates()
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.importTemplates',
+      () => templateCommands.importTemplates()
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.exportTemplates',
+      () => templateCommands.exportTemplates()
+    ),
+
+    // History commands
+    vscode.commands.registerCommand(
+      'promptiply.showHistory',
+      () => vscode.commands.executeCommand('promptiply.history.focus')
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.clearHistory',
+      async () => {
+        const confirm = await vscode.window.showWarningMessage(
+          'Clear all refinement history?',
+          'Clear',
+          'Cancel'
+        );
+        if (confirm === 'Clear') {
+          await historyManager.clear();
+          historyTreeView?.refresh();
+          vscode.window.showInformationMessage('History cleared');
+        }
+      }
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.showHistoryEntry',
+      (entry) => {
+        WebviewPanelManager.showHistoryEntry(entry);
+      }
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.deleteHistoryEntry',
+      async (item) => {
+        await historyManager.deleteById(item.entry.id);
+        historyTreeView?.refresh();
+        vscode.window.showInformationMessage('History entry deleted');
+      }
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.refreshHistory',
+      () => historyTreeView?.refresh()
     ),
 
     // Settings commands

@@ -52,7 +52,7 @@ export class RefinementEngine {
     config: RefinementConfig,
     progressCallback?: (message: string) => void,
     token?: vscode.CancellationToken
-  ): Promise<string> {
+  ): Promise<RefinementResult> {
     if (!prompt.trim()) {
       throw new Error('Prompt cannot be empty');
     }
@@ -127,7 +127,7 @@ export class RefinementEngine {
 
     progressCallback?.('Refinement complete!');
 
-    return result.refinedPrompt;
+    return result;
   }
 
   /**

@@ -5,14 +5,18 @@
 import * as vscode from 'vscode';
 import { RefinementEngine } from '../refinement/engine';
 import { ProfileManager } from '../profiles/manager';
+import { HistoryManager } from '../history/manager';
+import { WebviewPanelManager } from '../ui/webviewPanel';
 
 export class RefineCommands {
   private engine: RefinementEngine;
   private profileManager: ProfileManager;
+  private historyManager: HistoryManager;
 
-  constructor(engine: RefinementEngine, profileManager: ProfileManager) {
+  constructor(engine: RefinementEngine, profileManager: ProfileManager, historyManager: HistoryManager) {
     this.engine = engine;
     this.profileManager = profileManager;
+    this.historyManager = historyManager;
   }
 
   /**
@@ -145,7 +149,7 @@ export class RefineCommands {
           const config = RefinementEngine.getConfig();
 
           // Refine
-          const refined = await this.engine.refine(
+          const result = await this.engine.refine(
             text,
             config,
             (message) => {
@@ -158,27 +162,30 @@ export class RefineCommands {
             return;
           }
 
+          // Save to history
+          await this.saveToHistory(text, result, config);
+
           // Apply based on selected mode
           switch (selectedMode) {
             case 'inline':
-              await this.applyInline(editor, range, refined);
+              await this.applyInline(editor, range, result.refinedPrompt);
               break;
 
             case 'webview':
-              await this.showInWebview(text, refined, editor, range);
+              await this.showInWebview(text, result, editor, range);
               break;
 
             case 'diff':
-              await this.showDiff(text, refined, editor, range);
+              await this.showDiff(text, result.refinedPrompt, editor, range);
               break;
 
             case 'copy':
-              await vscode.env.clipboard.writeText(refined);
+              await vscode.env.clipboard.writeText(result.refinedPrompt);
               vscode.window.showInformationMessage('✨ Refined prompt copied to clipboard!');
               break;
 
             default:
-              await this.applyInline(editor, range, refined);
+              await this.applyInline(editor, range, result.refinedPrompt);
           }
         } catch (error: any) {
           vscode.window.showErrorMessage(`Refinement failed: ${error.message}`);
@@ -190,7 +197,7 @@ export class RefineCommands {
   /**
    * Refine and copy to clipboard (for AI chat integration)
    */
-  private async refineAndCopy(text: string, source: string): Promise<void> {
+  async refineAndCopy(text: string, source: string): Promise<void> {
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -202,7 +209,7 @@ export class RefineCommands {
           const config = RefinementEngine.getConfig();
 
           // Refine
-          const refined = await this.engine.refine(
+          const result = await this.engine.refine(
             text,
             config,
             (message) => {
@@ -214,6 +221,11 @@ export class RefineCommands {
           if (token.isCancellationRequested) {
             return;
           }
+
+          // Save to history
+          await this.saveToHistory(text, result, config);
+
+          const refined = result.refinedPrompt;
 
           // Show refined prompt in a nice dialog with options
           const action = await vscode.window.showInformationMessage(
@@ -249,7 +261,7 @@ export class RefineCommands {
                   value: refined,
                 },
                 {
-                  label: '📝 Original',
+                  label: '📝 original',
                   description: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
                   detail: `${text.length} characters`,
                   value: text,
@@ -295,25 +307,51 @@ export class RefineCommands {
    */
   private async showInWebview(
     original: string,
-    refined: string,
+    result: any,
     editor: vscode.TextEditor,
     range: vscode.Range | vscode.Selection
   ): Promise<void> {
-    // TODO: Implement webview panel
-    // For now, show a simple input box that allows editing
-    const result = await vscode.window.showInputBox({
-      prompt: 'Edit the refined prompt or press Enter to apply',
-      value: refined,
-      valueSelection: [0, 0],
-      placeHolder: 'Refined prompt...',
-    });
+    // Get active profile name
+    const profile = await this.profileManager.getActiveProfile();
+    const profileName = profile?.name;
 
-    if (result !== undefined) {
+    // Show in webview panel
+    WebviewPanelManager.showRefinement(original, result, profileName);
+
+    // Ask if user wants to apply to editor
+    const apply = await vscode.window.showInformationMessage(
+      'Apply refined prompt to editor?',
+      'Apply',
+      'Cancel'
+    );
+
+    if (apply === 'Apply') {
       await editor.edit(editBuilder => {
-        editBuilder.replace(range, result);
+        editBuilder.replace(range, result.refinedPrompt);
       });
       vscode.window.showInformationMessage('✨ Prompt applied!');
     }
+  }
+
+  /**
+   * Save refinement to history
+   */
+  private async saveToHistory(
+    originalPrompt: string,
+    result: any,
+    config: any
+  ): Promise<void> {
+    const profile = await this.profileManager.getActiveProfile();
+
+    await this.historyManager.addEntry({
+      originalPrompt,
+      refinedPrompt: result.refinedPrompt,
+      profile: profile?.name,
+      mode: config.mode,
+      isEconomy: config.useEconomyModel,
+      tokenUsage: result.tokenUsage,
+      topics: result.topics,
+    });
   }
 
   /**

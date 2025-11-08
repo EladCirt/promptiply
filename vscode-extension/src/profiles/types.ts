@@ -32,4 +32,9 @@ export interface ProfilesConfig {
 export interface RefinementResult {
   refinedPrompt: string;
   topics?: string[];
+  reasoning?: string;
+  tokenUsage?: {
+    input: number;
+    output: number;
+  };
 }

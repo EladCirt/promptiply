@@ -2,6 +2,68 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.4.0] - 2025-01-08
+
+### Major Features 🎉
+
+- **📜 Refinement History**: Track all your prompt refinements
+  - Tree view in sidebar showing history grouped by date
+  - Click any entry to view full details in rich webview
+  - Delete individual entries or clear all history
+  - History persists across VSCode sessions
+  - Stores original, refined prompts, profile used, and token usage
+
+- **🎨 Rich Webview Panel**: Beautiful UI for viewing refinements
+  - Syntax-highlighted prompt display
+  - Shows original vs refined side-by-side
+  - Displays reasoning, detected topics, and token usage
+  - One-click copy to clipboard
+  - Responsive design matching VSCode theme
+
+- **📚 Prompt Templates**: Pre-built templates for common tasks
+  - 12 built-in templates across 8 categories
+  - Code generation (functions, classes, API endpoints)
+  - Documentation (README, API docs)
+  - Debugging, testing, refactoring
+  - Code review and explanations
+  - Create custom templates with variables
+  - Import/export template collections
+  - Fill template variables interactively
+
+- **👤 Enhanced Profile Management**:
+  - Create custom profiles with guided UI
+  - View profile stats and evolution
+  - Delete unwanted profiles
+  - Better profile visualization
+
+### Commands Added
+
+- `Promptiply: Use Template` - Browse and use templates
+- `Promptiply: Create Custom Template` - Build your own templates
+- `Promptiply: Manage Templates` - View, edit, delete templates
+- `Promptiply: Import/Export Templates` - Share templates
+- `Promptiply: Create Profile` - Add new refinement profiles
+- `Promptiply: Delete Profile` - Remove profiles
+- `Promptiply: View Active Profile` - See profile details and stats
+- `Promptiply: Show Refinement History` - Open history sidebar
+- `Promptiply: Clear History` - Remove all history
+
+### UI Improvements
+
+- New sidebar view for refinement history
+- Activity bar icon for quick access to history
+- Context menu actions in history tree
+- Refresh and clear buttons in history view
+- Webview panel for rich refinement display
+
+### Technical
+
+- Automatic history tracking for all refinements
+- History storage with 100 entry limit
+- Template variable substitution system
+- Improved type definitions for RefinementResult
+- Better error handling throughout
+
 ## [0.3.1] - 2025-01-08
 
 ### GPT-5 Support 🚀

@@ -2,7 +2,7 @@
   "name": "promptiply",
   "displayName": "Promptiply",
   "description": "Refine your AI prompts for better results with Copilot, Claude Code, and more. Supports customizable profiles with smart topic tracking.",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "publisher": "promptiply",
   "icon": "media/icon.png",
   "repository": {
@@ -77,6 +77,81 @@
         "command": "promptiply.openSettings",
         "title": "Open Settings",
         "category": "Promptiply"
+      },
+      {
+        "command": "promptiply.createProfile",
+        "title": "Create Profile",
+        "category": "Promptiply",
+        "icon": "$(add)"
+      },
+      {
+        "command": "promptiply.deleteProfile",
+        "title": "Delete Profile",
+        "category": "Promptiply",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "promptiply.viewProfile",
+        "title": "View Active Profile",
+        "category": "Promptiply",
+        "icon": "$(info)"
+      },
+      {
+        "command": "promptiply.useTemplate",
+        "title": "Use Template",
+        "category": "Promptiply",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "promptiply.createTemplate",
+        "title": "Create Custom Template",
+        "category": "Promptiply",
+        "icon": "$(add)"
+      },
+      {
+        "command": "promptiply.manageTemplates",
+        "title": "Manage Templates",
+        "category": "Promptiply",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "promptiply.importTemplates",
+        "title": "Import Templates",
+        "category": "Promptiply"
+      },
+      {
+        "command": "promptiply.exportTemplates",
+        "title": "Export Templates",
+        "category": "Promptiply"
+      },
+      {
+        "command": "promptiply.showHistory",
+        "title": "Show Refinement History",
+        "category": "Promptiply",
+        "icon": "$(history)"
+      },
+      {
+        "command": "promptiply.clearHistory",
+        "title": "Clear History",
+        "category": "Promptiply",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "promptiply.showHistoryEntry",
+        "title": "Show History Entry",
+        "category": "Promptiply"
+      },
+      {
+        "command": "promptiply.deleteHistoryEntry",
+        "title": "Delete Entry",
+        "category": "Promptiply",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "promptiply.refreshHistory",
+        "title": "Refresh History",
+        "category": "Promptiply",
+        "icon": "$(refresh)"
       }
     ],
     "keybindings": [
@@ -108,6 +183,43 @@
           "command": "promptiply.refineSelection",
           "group": "promptiply",
           "when": "editorHasSelection"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "promptiply.refreshHistory",
+          "when": "view == promptiply.history",
+          "group": "navigation"
+        },
+        {
+          "command": "promptiply.clearHistory",
+          "when": "view == promptiply.history",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "promptiply.deleteHistoryEntry",
+          "when": "view == promptiply.history && viewItem == historyEntry",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "promptiply",
+          "title": "Promptiply",
+          "icon": "media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "promptiply": [
+        {
+          "id": "promptiply.history",
+          "name": "Refinement History",
+          "icon": "$(history)"
         }
       ]
     },
