@@ -70,7 +70,6 @@ export async function refineWithOpenAI(
       body: JSON.stringify({
         model: model,
         messages: messages,
-        temperature: 0.2,
         max_completion_tokens: 4096,
         response_format: { type: 'json_object' },
       }),
