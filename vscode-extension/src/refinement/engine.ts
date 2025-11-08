@@ -8,6 +8,8 @@ import { ProfileManager } from '../profiles/manager';
 import { buildSystemPrompt, buildUserPrompt } from './systemPrompt';
 import { refineWithVSCodeLM, isVSCodeLMAvailable } from './modes/vscodeLM';
 import { refineWithOllama, isOllamaAvailable } from './modes/ollama';
+import { refineWithOpenAI, isOpenAIConfigured } from './modes/openai';
+import { refineWithAnthropic, isAnthropicConfigured } from './modes/anthropic';
 
 export type RefinementMode = 'vscode-lm' | 'ollama' | 'openai-api' | 'anthropic-api';
 
@@ -91,10 +93,24 @@ export class RefinementEngine {
         break;
 
       case 'openai-api':
-        throw new Error('OpenAI API mode not yet implemented');
+        result = await this.refineWithOpenAI(
+          systemPrompt,
+          userPrompt,
+          config.useEconomyModel,
+          config.openai,
+          progressCallback
+        );
+        break;
 
       case 'anthropic-api':
-        throw new Error('Anthropic API mode not yet implemented');
+        result = await this.refineWithAnthropic(
+          systemPrompt,
+          userPrompt,
+          config.useEconomyModel,
+          config.anthropic,
+          progressCallback
+        );
+        break;
 
       default:
         throw new Error(`Unknown refinement mode: ${config.mode}`);
@@ -159,6 +175,56 @@ export class RefinementEngine {
     }
 
     return refineWithOllama(
+      systemPrompt,
+      userPrompt,
+      useEconomy,
+      config,
+      progressCallback
+    );
+  }
+
+  /**
+   * Refine with OpenAI API
+   */
+  private async refineWithOpenAI(
+    systemPrompt: string,
+    userPrompt: string,
+    useEconomy: boolean,
+    config: RefinementConfig['openai'],
+    progressCallback?: (message: string) => void
+  ): Promise<RefinementResult> {
+    if (!isOpenAIConfigured(config.apiKey)) {
+      throw new Error(
+        'OpenAI API key not configured. Please add it in Settings: promptiply.openai.apiKey'
+      );
+    }
+
+    return refineWithOpenAI(
+      systemPrompt,
+      userPrompt,
+      useEconomy,
+      config,
+      progressCallback
+    );
+  }
+
+  /**
+   * Refine with Anthropic API
+   */
+  private async refineWithAnthropic(
+    systemPrompt: string,
+    userPrompt: string,
+    useEconomy: boolean,
+    config: RefinementConfig['anthropic'],
+    progressCallback?: (message: string) => void
+  ): Promise<RefinementResult> {
+    if (!isAnthropicConfigured(config.apiKey)) {
+      throw new Error(
+        'Anthropic API key not configured. Please add it in Settings: promptiply.anthropic.apiKey'
+      );
+    }
+
+    return refineWithAnthropic(
       systemPrompt,
       userPrompt,
       useEconomy,

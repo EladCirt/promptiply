@@ -9,11 +9,11 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 - **👤 Customizable Profiles**: Tailor refinements to match your workflow (Technical Writer, Developer, etc.)
 - **📊 Smart Topic Tracking**: Profiles evolve based on your usage patterns
 - **💰 Economy/Premium Modes**: Choose speed & cost vs. quality
-- **🆓 Multiple Modes**:
-  - VSCode LM API (uses your Copilot subscription - **FREE**)
-  - Ollama (local models - **FREE & Private**)
-  - OpenAI API (pay-per-use)
-  - Anthropic API (pay-per-use)
+- **🆓 Multiple AI Providers**:
+  - **VSCode LM API** - Uses your Copilot subscription (FREE!)
+  - **Ollama** - Local models (FREE & Private)
+  - **OpenAI API** - Direct access to GPT-4, GPT-4o-mini (pay-per-use)
+  - **Anthropic API** - Direct access to Claude 3.5 Sonnet/Haiku (pay-per-use)
 - **🎯 Flexible UI**: Inline replacement, diff view, or side panel
 - **⌨️ Keyboard Shortcuts**: Fast refinement with `Ctrl+Shift+R`
 - **🔄 Import/Export**: Share profiles across devices or with your team
@@ -60,8 +60,13 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 - [Ollama](https://ollama.ai) installed and running
 - A model pulled (e.g., `ollama pull llama3.1:8b`)
 
-**For API modes:**
-- API key from OpenAI or Anthropic
+**For OpenAI API mode:**
+- OpenAI API key from https://platform.openai.com/api-keys
+- Active OpenAI account with credits
+
+**For Anthropic API mode:**
+- Anthropic API key from https://console.anthropic.com/
+- Active Anthropic account with credits
 
 ## ⚙️ Configuration
 
@@ -75,14 +80,24 @@ Open Settings (`Cmd/Ctrl+,`) and search for "Promptiply":
   // Use economy models (faster, cheaper)
   "promptiply.useEconomyModel": true,
 
-  // VSCode LM settings
+  // VSCode LM settings (uses your Copilot subscription)
   "promptiply.vscodeLM.economyFamily": "gpt-3.5-turbo",
   "promptiply.vscodeLM.premiumFamily": "gpt-4o",
 
-  // Ollama settings
+  // Ollama settings (local, free)
   "promptiply.ollama.endpoint": "http://localhost:11434",
   "promptiply.ollama.economyModel": "llama3.2:3b",
   "promptiply.ollama.premiumModel": "llama3.1:8b",
+
+  // OpenAI API settings (pay-per-use)
+  "promptiply.openai.apiKey": "sk-...",  // Get from https://platform.openai.com/api-keys
+  "promptiply.openai.economyModel": "gpt-4o-mini",  // ~$0.15/1M tokens
+  "promptiply.openai.premiumModel": "gpt-4o",       // ~$2.50/1M tokens
+
+  // Anthropic API settings (pay-per-use)
+  "promptiply.anthropic.apiKey": "sk-ant-...",  // Get from https://console.anthropic.com/
+  "promptiply.anthropic.economyModel": "claude-3-5-haiku-20241022",  // ~$1/1M tokens
+  "promptiply.anthropic.premiumModel": "claude-3-5-sonnet-20241022", // ~$3/1M tokens
 
   // UI preferences
   "promptiply.ui.defaultMode": "ask", // "inline", "webview", "diff", or "ask"
@@ -91,6 +106,22 @@ Open Settings (`Cmd/Ctrl+,`) and search for "Promptiply":
   "promptiply.codeLens.enabled": true
 }
 ```
+
+### 🔑 Adding API Keys
+
+**OpenAI:**
+1. Visit https://platform.openai.com/api-keys
+2. Create a new API key
+3. Add to settings: `"promptiply.openai.apiKey": "sk-..."`
+4. Set mode: `"promptiply.mode": "openai-api"`
+
+**Anthropic:**
+1. Visit https://console.anthropic.com/
+2. Create a new API key
+3. Add to settings: `"promptiply.anthropic.apiKey": "sk-ant-..."`
+4. Set mode: `"promptiply.mode": "anthropic-api"`
+
+**Note:** API keys are stored in VSCode settings. For better security, consider using environment variables or VSCode secrets API in future versions.
 
 ## 🎮 Commands
 

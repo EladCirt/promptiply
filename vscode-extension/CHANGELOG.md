@@ -2,6 +2,38 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.3.0] - 2025-01-08
+
+### OpenAI & Anthropic API Support 🎉
+
+- 🤖 **OpenAI API Mode**: Direct access to GPT models
+  - Economy: `gpt-4o-mini` (~$0.15/1M tokens)
+  - Premium: `gpt-4o` (~$2.50/1M tokens)
+  - Full API integration with error handling
+  - Automatic token usage logging
+  - JSON response parsing with fallbacks
+- 🧠 **Anthropic API Mode**: Direct access to Claude models
+  - Economy: `claude-3-5-haiku-20241022` (~$1/1M tokens)
+  - Premium: `claude-3-5-sonnet-20241022` (~$3/1M tokens)
+  - Native Anthropic API integration
+  - Supports system prompts properly
+  - Smart response parsing
+- ⚙️ **Easy Configuration**: Just add API keys in settings
+- 🔒 **Secure**: API keys stored in VSCode settings
+- 💰 **Cost Tracking**: Token usage logged to console
+- 🚀 **Feature Complete**: All 4 modes now fully functional!
+
+### Improvements
+
+- Better error messages for API authentication issues
+- Rate limit handling for both APIs
+- Improved response parsing with multiple fallback strategies
+- Comprehensive documentation for API setup
+
+### Breaking Changes
+
+None - fully backward compatible with v0.2.0
+
 ## [0.2.0] - 2025-01-08
 
 ### AI Chat Integration (Major Feature!)
