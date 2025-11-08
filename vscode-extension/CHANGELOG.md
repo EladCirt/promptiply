@@ -2,6 +2,16 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.3.1] - 2025-01-08
+
+### GPT-5 Support 🚀
+
+- 🤖 **Updated to GPT-5 Models**: Defaults now use the latest GPT-5 family
+  - Economy: `gpt-5-mini` (fast and cost-effective)
+  - Premium: `gpt-5-2025-08-07` (flagship model)
+- ✨ Full compatibility with GPT-5 API requirements
+- 🔄 Users can still configure older models if preferred
+
 ## [0.3.0] - 2025-01-08
 
 ### OpenAI & Anthropic API Support 🎉

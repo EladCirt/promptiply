@@ -2,7 +2,7 @@
   "name": "promptiply",
   "displayName": "Promptiply",
   "description": "Refine your AI prompts for better results with Copilot, Claude Code, and more. Supports customizable profiles with smart topic tracking.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "promptiply",
   "icon": "media/icon.png",
   "repository": {
@@ -168,13 +168,13 @@
         },
         "promptiply.openai.economyModel": {
           "type": "string",
-          "default": "gpt-4o-mini",
-          "description": "OpenAI economy model"
+          "default": "gpt-5-mini",
+          "description": "OpenAI economy model (GPT-5 Mini)"
         },
         "promptiply.openai.premiumModel": {
           "type": "string",
-          "default": "gpt-4o",
-          "description": "OpenAI premium model"
+          "default": "gpt-5-2025-08-07",
+          "description": "OpenAI premium model (GPT-5)"
         },
         "promptiply.anthropic.apiKey": {
           "type": "string",

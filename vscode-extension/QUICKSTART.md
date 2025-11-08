@@ -19,9 +19,19 @@ Promptiply works with multiple AI providers. Pick the one that works best for yo
 3. Pull a model: `ollama pull llama3.1:8b`
 4. Change mode in settings: `"promptiply.mode": "ollama"`
 
-#### Option C: API Keys (Pay-per-use)
+#### Option C: OpenAI API (Pay-per-use)
 
-Coming soon: OpenAI and Anthropic API support
+1. Get API key: https://platform.openai.com/api-keys
+2. Add to settings: `"promptiply.openai.apiKey": "sk-..."`
+3. Change mode: `"promptiply.mode": "openai-api"`
+4. Uses GPT-5 models by default
+
+#### Option D: Anthropic API (Pay-per-use)
+
+1. Get API key: https://console.anthropic.com/
+2. Add to settings: `"promptiply.anthropic.apiKey": "sk-ant-..."`
+3. Change mode: `"promptiply.mode": "anthropic-api"`
+4. Uses Claude 3.5 models by default
 
 ### Step 2: Select a Profile
 
@@ -76,8 +86,8 @@ Create a TypeScript function that:
 
 Toggle with `Promptiply: Toggle Economy/Premium Mode`
 
-- **Economy**: Faster, cheaper (gpt-3.5-turbo, llama3.2:3b)
-- **Premium**: Better quality, slower (gpt-4o, llama3.1:8b)
+- **Economy**: Faster, cheaper (gpt-3.5-turbo for Copilot, gpt-5-mini for OpenAI, llama3.2:3b for Ollama)
+- **Premium**: Better quality, slower (gpt-4o for Copilot, gpt-5 for OpenAI, llama3.1:8b for Ollama)
 
 Both are FREE if using Copilot or Ollama!
 

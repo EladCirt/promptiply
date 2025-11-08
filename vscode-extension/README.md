@@ -12,7 +12,7 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 - **🆓 Multiple AI Providers**:
   - **VSCode LM API** - Uses your Copilot subscription (FREE!)
   - **Ollama** - Local models (FREE & Private)
-  - **OpenAI API** - Direct access to GPT-4, GPT-4o-mini (pay-per-use)
+  - **OpenAI API** - Direct access to GPT-5, GPT-5 Mini (pay-per-use)
   - **Anthropic API** - Direct access to Claude 3.5 Sonnet/Haiku (pay-per-use)
 - **🎯 Flexible UI**: Inline replacement, diff view, or side panel
 - **⌨️ Keyboard Shortcuts**: Fast refinement with `Ctrl+Shift+R`
@@ -91,8 +91,8 @@ Open Settings (`Cmd/Ctrl+,`) and search for "Promptiply":
 
   // OpenAI API settings (pay-per-use)
   "promptiply.openai.apiKey": "sk-...",  // Get from https://platform.openai.com/api-keys
-  "promptiply.openai.economyModel": "gpt-4o-mini",  // ~$0.15/1M tokens
-  "promptiply.openai.premiumModel": "gpt-4o",       // ~$2.50/1M tokens
+  "promptiply.openai.economyModel": "gpt-5-mini",         // GPT-5 Mini (fast and cost-effective)
+  "promptiply.openai.premiumModel": "gpt-5-2025-08-07",   // GPT-5 (flagship model)
 
   // Anthropic API settings (pay-per-use)
   "promptiply.anthropic.apiKey": "sk-ant-...",  // Get from https://console.anthropic.com/
