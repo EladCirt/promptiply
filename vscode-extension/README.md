@@ -4,6 +4,7 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 
 ## ✨ Features
 
+- **💬 AI Chat Integration (NEW!)**: Refine prompts for Copilot Chat, Cursor, Claude Code with `Cmd+Shift+Alt+R`
 - **🔮 Prompt Refinement**: Transform casual prompts into clear, structured requests
 - **👤 Customizable Profiles**: Tailor refinements to match your workflow (Technical Writer, Developer, etc.)
 - **📊 Smart Topic Tracking**: Profiles evolve based on your usage patterns
@@ -19,11 +20,35 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 
 ## 🚀 Quick Start
 
+### For File/Editor Work
 1. **Install the extension**
 2. **Select a profile** (click status bar or `Ctrl+Shift+Alt+P`)
 3. **Write a prompt** in any file
 4. **Select the text** and press `Ctrl+Shift+R` (or right-click → "Refine with Promptiply")
 5. **Choose how to apply**: Inline, Webview, Diff, or Copy
+
+### 💬 For AI Chat Integration (NEW!)
+**Perfect for Copilot Chat, Cursor, Claude Code, and any AI chat interface!**
+
+**Method 1: Clipboard (Recommended)**
+1. Type/paste your prompt in the AI chat
+2. **Select and copy** your prompt (`Cmd+C`)
+3. Press `Cmd+Shift+Alt+R` (or Command Palette → "Refine from Clipboard")
+4. Review refined prompt and click "Copy to Clipboard"
+5. **Paste** into AI chat (`Cmd+V`)
+
+**Method 2: Input Box**
+1. Press `Cmd+Alt+R` (or Command Palette → "Refine from Input Box")
+2. Type or paste your prompt in the input box
+3. Press Enter
+4. Review refined prompt and click "Copy to Clipboard"
+5. Paste into AI chat
+
+**Why this is awesome:**
+- ✨ Refine prompts **without leaving your AI chat**
+- 🚀 Works with **any AI tool** (Copilot, Cursor, Claude, Continue, etc.)
+- ⚡ Super fast workflow: Copy → Refine → Paste
+- 🎯 Same powerful profile system and topic tracking
 
 ## 📋 Requirements
 
@@ -71,7 +96,9 @@ Open Settings (`Cmd/Ctrl+,`) and search for "Promptiply":
 
 | Command | Keyboard Shortcut | Description |
 |---------|------------------|-------------|
-| `Promptiply: Refine Selection` | `Ctrl+Shift+R` | Refine selected text |
+| `Promptiply: Refine Selection` | `Ctrl+Shift+R` | Refine selected text in editor |
+| **`Promptiply: Refine from Clipboard`** | **`Ctrl+Shift+Alt+R`** | **Refine clipboard content (for AI chats!)** |
+| **`Promptiply: Refine from Input Box`** | **`Ctrl+Alt+R`** | **Type/paste prompt to refine** |
 | `Promptiply: Switch Profile` | `Ctrl+Shift+Alt+P` | Change active profile |
 | `Promptiply: Toggle Economy/Premium` | - | Switch between economy and premium models |
 | `Promptiply: Import Profiles` | - | Import profiles from Chrome extension or backup |
@@ -139,6 +166,46 @@ Provide a comprehensive explanation of JSON Web Tokens (JWT) including:
 5. Step-by-step example of JWT implementation
 Use clear language with diagrams where helpful.
 ```
+
+### Example 3: AI Chat Integration (NEW!)
+
+**Scenario:** You're in Copilot Chat and want to refine your prompt before sending
+
+**Original prompt (typed in chat):**
+```
+how do i make my react app faster
+```
+
+**Workflow:**
+1. Select your prompt in chat and copy (`Cmd+C`)
+2. Press `Cmd+Shift+Alt+R`
+3. Promptiply refines it in the background
+4. Click "Copy to Clipboard"
+5. Paste refined prompt back into chat (`Cmd+V`)
+
+**Refined prompt (with Dev Helper profile):**
+```
+Analyze and optimize React application performance by:
+
+1. Identifying current performance bottlenecks:
+   • Excessive re-renders
+   • Large bundle sizes
+   • Unoptimized images/assets
+   • Memory leaks
+
+2. Recommending specific optimizations:
+   • React.memo() for expensive components
+   • useMemo()/useCallback() for computed values
+   • Code splitting with React.lazy()
+   • Image optimization strategies
+
+3. Providing before/after code examples
+4. Suggesting performance monitoring tools (React DevTools Profiler, Lighthouse)
+
+Include measurable improvements (load time, FCP, TTI) for each optimization.
+```
+
+**Result:** You get much better, more specific answers from your AI assistant! 🎯
 
 ## 🔄 Import from Chrome Extension
 

@@ -62,6 +62,44 @@ export class RefineCommands {
   }
 
   /**
+   * Refine from clipboard - perfect for AI chat interfaces!
+   * 1. Copy your prompt from chat (Cmd+C)
+   * 2. Trigger this command (Cmd+Shift+Alt+R)
+   * 3. Refined prompt is copied back to clipboard
+   * 4. Paste into chat (Cmd+V)
+   */
+  async refineFromClipboard(): Promise<void> {
+    // Read clipboard
+    const clipboardText = await vscode.env.clipboard.readText();
+
+    if (!clipboardText.trim()) {
+      vscode.window.showErrorMessage('Clipboard is empty. Copy some text first!');
+      return;
+    }
+
+    // Refine without editor
+    await this.refineAndCopy(clipboardText, 'Clipboard');
+  }
+
+  /**
+   * Refine from input box - type or paste your prompt
+   * Perfect for quick refinements without leaving your workflow
+   */
+  async refineFromInput(): Promise<void> {
+    const input = await vscode.window.showInputBox({
+      prompt: 'Enter the prompt you want to refine (you can paste multiline text)',
+      placeHolder: 'e.g., make a function that sorts arrays',
+      ignoreFocusOut: true,
+    });
+
+    if (!input || !input.trim()) {
+      return; // User cancelled or empty
+    }
+
+    await this.refineAndCopy(input, 'Input');
+  }
+
+  /**
    * Main refinement logic
    */
   private async refineText(
@@ -141,6 +179,94 @@ export class RefineCommands {
 
             default:
               await this.applyInline(editor, range, refined);
+          }
+        } catch (error: any) {
+          vscode.window.showErrorMessage(`Refinement failed: ${error.message}`);
+        }
+      }
+    );
+  }
+
+  /**
+   * Refine and copy to clipboard (for AI chat integration)
+   */
+  private async refineAndCopy(text: string, source: string): Promise<void> {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `Refining ${source.toLowerCase()} content...`,
+        cancellable: true,
+      },
+      async (progress, token) => {
+        try {
+          const config = RefinementEngine.getConfig();
+
+          // Refine
+          const refined = await this.engine.refine(
+            text,
+            config,
+            (message) => {
+              progress.report({ message });
+            },
+            token
+          );
+
+          if (token.isCancellationRequested) {
+            return;
+          }
+
+          // Show refined prompt in a nice dialog with options
+          const action = await vscode.window.showInformationMessage(
+            `✨ Prompt refined! (${refined.length} characters)`,
+            { modal: false },
+            'Copy to Clipboard',
+            'Edit Before Copying',
+            'View Original'
+          );
+
+          if (action === 'Copy to Clipboard') {
+            await vscode.env.clipboard.writeText(refined);
+            vscode.window.showInformationMessage('📋 Copied! Paste into your AI chat (Cmd+V)');
+          } else if (action === 'Edit Before Copying') {
+            const edited = await vscode.window.showInputBox({
+              prompt: 'Edit the refined prompt if needed',
+              value: refined,
+              ignoreFocusOut: true,
+            });
+
+            if (edited !== undefined) {
+              await vscode.env.clipboard.writeText(edited);
+              vscode.window.showInformationMessage('📋 Edited version copied! Paste into your AI chat (Cmd+V)');
+            }
+          } else if (action === 'View Original') {
+            // Show original vs refined in a quick pick
+            const choice = await vscode.window.showQuickPick(
+              [
+                {
+                  label: '✨ Refined (Recommended)',
+                  description: refined.substring(0, 100) + (refined.length > 100 ? '...' : ''),
+                  detail: `${refined.length} characters`,
+                  value: refined,
+                },
+                {
+                  label: '📝 Original',
+                  description: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+                  detail: `${text.length} characters`,
+                  value: text,
+                },
+              ],
+              {
+                placeHolder: 'Choose which version to copy',
+              }
+            );
+
+            if (choice) {
+              await vscode.env.clipboard.writeText(choice.value);
+              vscode.window.showInformationMessage('📋 Copied! Paste into your AI chat (Cmd+V)');
+            }
+          } else {
+            // User dismissed, still copy refined version for convenience
+            await vscode.env.clipboard.writeText(refined);
           }
         } catch (error: any) {
           vscode.window.showErrorMessage(`Refinement failed: ${error.message}`);

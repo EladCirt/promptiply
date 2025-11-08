@@ -40,6 +40,14 @@ export async function activate(context: vscode.ExtensionContext) {
       'promptiply.refineFile',
       () => refineCommands.refineFile()
     ),
+    vscode.commands.registerCommand(
+      'promptiply.refineFromClipboard',
+      () => refineCommands.refineFromClipboard()
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.refineFromInput',
+      () => refineCommands.refineFromInput()
+    ),
 
     // Profile commands
     vscode.commands.registerCommand(
