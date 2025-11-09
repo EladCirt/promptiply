@@ -13,6 +13,7 @@ export class PromptiplyChat {
   private profileManager: ProfileManager;
   private historyManager: HistoryManager;
   private participant: vscode.ChatParticipant | undefined;
+  private static outputChannel: vscode.OutputChannel;
 
   constructor(
     engine: RefinementEngine,
@@ -22,6 +23,16 @@ export class PromptiplyChat {
     this.engine = engine;
     this.profileManager = profileManager;
     this.historyManager = historyManager;
+
+    // Create output channel if it doesn't exist
+    if (!PromptiplyChat.outputChannel) {
+      PromptiplyChat.outputChannel = vscode.window.createOutputChannel('Promptiply');
+    }
+  }
+
+  private log(message: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+    PromptiplyChat.outputChannel.appendLine(`[${timestamp}] ${message}`);
   }
 
   /**
@@ -64,19 +75,26 @@ export class PromptiplyChat {
         const recommendConfig = vscode.workspace.getConfiguration('promptiply');
         const showRecommendations = recommendConfig.get<boolean>('recommendations.enabled', true);
 
-        console.log('[Promptiply] Recommendations enabled:', showRecommendations);
-        console.log('[Promptiply] Active profile:', profile?.name || 'none');
+        // Show output channel for debugging
+        PromptiplyChat.outputChannel.show(true);
+
+        this.log('=== Profile Recommendation System ===');
+        this.log(`Recommendations enabled: ${showRecommendations}`);
+        this.log(`Active profile: ${profile?.name || 'none'}`);
+        this.log(`Prompt preview: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`);
 
         if (showRecommendations && !profile) {
           const profiles = await this.profileManager.getProfiles();
-          console.log('[Promptiply] Available profiles:', profiles.list.map(p => p.name));
+          this.log(`Available profiles: ${profiles.list.map(p => p.name).join(', ')}`);
 
           const recommendation = ProfileRecommender.recommend(prompt, profiles.list);
-          console.log('[Promptiply] Recommendation:', recommendation.profile?.name || 'none',
-                      'Confidence:', recommendation.confidence,
-                      'Reason:', recommendation.reason);
+          this.log(`Recommendation result: ${recommendation.profile?.name || 'none'}`);
+          this.log(`Confidence: ${(recommendation.confidence * 100).toFixed(1)}%`);
+          this.log(`Reason: ${recommendation.reason}`);
 
           if (recommendation.profile && recommendation.confidence > 0.5) {
+            this.log('✓ Showing recommendation in chat (confidence > 50%)');
+
             stream.markdown(`💡 **Recommended Profile:** ${recommendation.profile.name}\n`);
             stream.markdown(`*${recommendation.reason}* (${Math.round(recommendation.confidence * 100)}% confidence)\n\n`);
 
@@ -88,11 +106,16 @@ export class PromptiplyChat {
 
             stream.markdown('\n\n');
           } else {
-            console.log('[Promptiply] Not showing recommendation - confidence too low or no match');
+            this.log('✗ Not showing recommendation - confidence too low (needs > 50%)');
           }
         } else {
-          console.log('[Promptiply] Skipping recommendations - disabled or profile active');
+          if (!showRecommendations) {
+            this.log('✗ Skipping recommendations - disabled in settings');
+          } else {
+            this.log('✗ Skipping recommendations - profile already active');
+          }
         }
+        this.log('=====================================\n');
 
         stream.progress('Refining your prompt...');
 
