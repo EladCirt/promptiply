@@ -9,12 +9,14 @@ All notable changes to the "Promptiply" extension will be documented in this fil
 - **💡 Smart Profile Recommendations**: Get intelligent profile suggestions in chat
   - Analyzes your prompt content and suggests the best profile
   - Pattern matching for code, documentation, testing, and marketing prompts
+  - Extensive keyword library: Docker, .NET, Python, React, APIs, databases, and more
   - Keyword analysis based on profile personas and style guidelines
   - Historical topic weighting for improved accuracy
   - Shows confidence score and human-readable reason
   - Click button to instantly apply recommended profile
-  - Only shows when confidence is above 50% and no active profile
+  - Only shows when confidence is above 35% and no active profile
   - Enable/disable in settings: `promptiply.recommendations.enabled`
+  - Debug logging in Output panel (View → Output → "Promptiply")
 
 ### Cross-Platform Profile Sync 🔄
 

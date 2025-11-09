@@ -92,8 +92,8 @@ export class PromptiplyChat {
           this.log(`Confidence: ${(recommendation.confidence * 100).toFixed(1)}%`);
           this.log(`Reason: ${recommendation.reason}`);
 
-          if (recommendation.profile && recommendation.confidence > 0.5) {
-            this.log('✓ Showing recommendation in chat (confidence > 50%)');
+          if (recommendation.profile && recommendation.confidence > 0.35) {
+            this.log('✓ Showing recommendation in chat (confidence > 35%)');
 
             stream.markdown(`💡 **Recommended Profile:** ${recommendation.profile.name}\n`);
             stream.markdown(`*${recommendation.reason}* (${Math.round(recommendation.confidence * 100)}% confidence)\n\n`);
@@ -106,7 +106,7 @@ export class PromptiplyChat {
 
             stream.markdown('\n\n');
           } else {
-            this.log('✗ Not showing recommendation - confidence too low (needs > 50%)');
+            this.log('✗ Not showing recommendation - confidence too low (needs > 35%)');
           }
         } else {
           if (!showRecommendations) {

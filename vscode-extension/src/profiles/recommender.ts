@@ -101,21 +101,32 @@ export class ProfileRecommender {
     // Code-related patterns
     const codePatterns = [
       'function', 'class', 'method', 'code', 'implement', 'algorithm',
-      'refactor', 'optimize', 'debug', 'fix', 'error', 'bug'
+      'refactor', 'optimize', 'debug', 'fix', 'error', 'bug',
+      'create', 'build', 'develop', 'program', 'script', 'app', 'application',
+      'docker', 'dockerfile', 'container', 'deploy', 'api', 'endpoint',
+      'component', 'module', 'package', 'library', 'framework',
+      '.net', 'python', 'java', 'javascript', 'typescript', 'react', 'vue',
+      'node', 'express', 'django', 'flask', 'spring', 'laravel',
+      'database', 'sql', 'mongodb', 'postgres', 'mysql',
+      'service', 'microservice', 'architecture', 'design pattern',
+      'variable', 'loop', 'conditional', 'async', 'await', 'promise'
     ];
 
     const docPatterns = [
       'document', 'explain', 'describe', 'write', 'readme', 'guide',
-      'tutorial', 'help', 'how to', 'what is'
+      'tutorial', 'help', 'how to', 'what is', 'documentation',
+      'comment', 'comments', 'instruction', 'instructions'
     ];
 
     const testPatterns = [
-      'test', 'spec', 'unit test', 'integration', 'coverage', 'assert'
+      'test', 'spec', 'unit test', 'integration', 'coverage', 'assert',
+      'testing', 'jest', 'mocha', 'pytest', 'junit'
     ];
 
     const marketingPatterns = [
       'marketing', 'sell', 'persuade', 'convert', 'campaign', 'audience',
-      'engagement', 'brand', 'message'
+      'engagement', 'brand', 'message', 'copy', 'advertisement',
+      'promotion', 'customer', 'user acquisition'
     ];
 
     // Check if profile is code-focused
@@ -157,11 +168,27 @@ export class ProfileRecommender {
   private static getReasonForProfile(prompt: string, profile: Profile): string {
     const lowerPrompt = prompt.toLowerCase();
 
-    // Check what matched
+    // Check what matched - be more specific
+    if (lowerPrompt.includes('docker') || lowerPrompt.includes('container')) {
+      if (profile.persona.toLowerCase().includes('developer') ||
+          profile.name.toLowerCase().includes('dev')) {
+        return `Best for DevOps and containerization tasks`;
+      }
+    }
+
     if (lowerPrompt.includes('function') || lowerPrompt.includes('code') ||
-        lowerPrompt.includes('implement')) {
+        lowerPrompt.includes('implement') || lowerPrompt.includes('create') ||
+        lowerPrompt.includes('build') || lowerPrompt.includes('develop')) {
+      if (profile.persona.toLowerCase().includes('developer') ||
+          profile.name.toLowerCase().includes('dev')) {
+        return `Best for code development and implementation`;
+      }
+    }
+
+    if (lowerPrompt.includes('api') || lowerPrompt.includes('endpoint') ||
+        lowerPrompt.includes('service')) {
       if (profile.persona.toLowerCase().includes('developer')) {
-        return `Best for code-related prompts like this`;
+        return `Optimized for API and service development`;
       }
     }
 
