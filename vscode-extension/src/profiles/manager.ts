@@ -276,7 +276,7 @@ export class ProfileManager {
   /**
    * Save profiles to storage
    */
-  private async saveProfiles(config: ProfilesConfig): Promise<void> {
+  async saveProfiles(config: ProfilesConfig): Promise<void> {
     await this.context.globalState.update('profiles', config);
   }
 

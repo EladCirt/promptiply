@@ -103,6 +103,12 @@
         "icon": "$(star)"
       },
       {
+        "command": "promptiply.resetProfilesToDefaults",
+        "title": "Reset Profiles to Defaults (9 Professional Profiles)",
+        "category": "Promptiply",
+        "icon": "$(refresh)"
+      },
+      {
         "command": "promptiply.useTemplate",
         "title": "Use Template",
         "category": "Promptiply",

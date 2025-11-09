@@ -388,4 +388,37 @@ export class ProfileCommands {
       vscode.window.showErrorMessage(`Failed to install profile: ${error.message}`);
     }
   }
+
+  /**
+   * Reset all profiles to defaults (9 professional profiles)
+   */
+  async resetToDefaults(): Promise<void> {
+    const confirm = await vscode.window.showWarningMessage(
+      'Reset all profiles to the 9 professional defaults? This will DELETE all your current profiles.',
+      { modal: true },
+      'Reset to Defaults',
+      'Cancel'
+    );
+
+    if (confirm !== 'Reset to Defaults') {
+      return;
+    }
+
+    try {
+      // Clear all profiles by setting an empty config
+      await this.profileManager.saveProfiles({
+        list: [],
+        activeProfileId: null
+      });
+
+      // Get fresh defaults (this will trigger loading the 9 professional profiles)
+      const config = await this.profileManager.getProfiles();
+
+      vscode.window.showInformationMessage(
+        `✅ Profiles reset! You now have ${config.list.length} professional profiles:\n${config.list.map(p => p.name).join(', ')}`
+      );
+    } catch (error: any) {
+      vscode.window.showErrorMessage(`Failed to reset profiles: ${error.message}`);
+    }
+  }
 }

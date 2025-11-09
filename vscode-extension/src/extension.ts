@@ -139,6 +139,13 @@ export async function activate(context: vscode.ExtensionContext) {
         await statusBarManager?.update();
       }
     ),
+    vscode.commands.registerCommand(
+      'promptiply.resetProfilesToDefaults',
+      async () => {
+        await profileCommands.resetToDefaults();
+        await statusBarManager?.update();
+      }
+    ),
 
     // Template commands
     vscode.commands.registerCommand(
