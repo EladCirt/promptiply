@@ -14,6 +14,7 @@ export class PromptiplyChat {
   private historyManager: HistoryManager;
   private participant: vscode.ChatParticipant | undefined;
   private static outputChannel: vscode.OutputChannel;
+  public static skipNextRecommendation = false; // Flag to skip recommendation on next request
 
   constructor(
     engine: RefinementEngine,
@@ -80,10 +81,16 @@ export class PromptiplyChat {
 
         this.log('=== Profile Recommendation System ===');
         this.log(`Recommendations enabled: ${showRecommendations}`);
+        this.log(`Skip flag: ${PromptiplyChat.skipNextRecommendation}`);
         this.log(`Active profile: ${profile?.name || 'none'}`);
         this.log(`Prompt preview: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`);
 
-        if (showRecommendations && !profile) {
+        // Check if we should skip recommendations (user clicked "Skip" button)
+        if (PromptiplyChat.skipNextRecommendation) {
+          this.log('✓ Skipping recommendations - user requested skip');
+          PromptiplyChat.skipNextRecommendation = false; // Reset the flag
+          this.log('=====================================\n');
+        } else if (showRecommendations && !profile) {
           const profiles = await this.profileManager.getProfiles();
           this.log(`Available profiles: ${profiles.list.map(p => p.name).join(', ')}`);
 
@@ -121,15 +128,16 @@ export class PromptiplyChat {
             return; // Stop here - wait for user decision
           } else {
             this.log('✗ Not showing recommendation - confidence too low (needs > 35%)');
+            this.log('=====================================\n');
           }
         } else {
           if (!showRecommendations) {
             this.log('✗ Skipping recommendations - disabled in settings');
-          } else {
+          } else if (profile) {
             this.log('✗ Skipping recommendations - profile already active');
           }
+          this.log('=====================================\n');
         }
-        this.log('=====================================\n');
 
         stream.progress('Refining your prompt...');
 
@@ -416,11 +424,8 @@ export function registerChatCommands(
   // Refine without profile (skip recommendation)
   context.subscriptions.push(
     vscode.commands.registerCommand('promptiply.chatRefineWithNoProfile', async (prompt: string) => {
-      // Temporarily disable recommendations
-      const config = vscode.workspace.getConfiguration('promptiply');
-      const wasEnabled = config.get<boolean>('recommendations.enabled', true);
-
-      await config.update('recommendations.enabled', false, vscode.ConfigurationTarget.Global);
+      // Set flag to skip next recommendation
+      PromptiplyChat.skipNextRecommendation = true;
 
       // Set no profile
       await profileManager.setActiveProfile(null);
@@ -429,11 +434,6 @@ export function registerChatCommands(
       await vscode.commands.executeCommand('workbench.action.chat.open', {
         query: `@promptiply ${prompt}`
       });
-
-      // Re-enable recommendations after a short delay (to allow the chat to process)
-      setTimeout(async () => {
-        await config.update('recommendations.enabled', wasEnabled, vscode.ConfigurationTarget.Global);
-      }, 2000);
     })
   );
 
