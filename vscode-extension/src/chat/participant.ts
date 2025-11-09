@@ -134,6 +134,12 @@ export class PromptiplyChat {
 
         // Add follow-up actions
         stream.button({
+          command: 'promptiply.sendRefinedToChat',
+          title: '🚀 Send Refined to Chat',
+          arguments: [result.refinedPrompt]
+        });
+
+        stream.button({
           command: 'promptiply.copyLastRefinement',
           title: '📋 Copy Refined',
           arguments: [result.refinedPrompt]
@@ -250,6 +256,23 @@ export function registerChatCommands(
   profileManager: ProfileManager,
   historyManager: HistoryManager
 ): void {
+  // Send refined prompt to chat
+  context.subscriptions.push(
+    vscode.commands.registerCommand('promptiply.sendRefinedToChat', async (text: string) => {
+      try {
+        // Send the refined prompt to the active chat
+        await vscode.commands.executeCommand('workbench.action.chat.open', {
+          query: text
+        });
+        vscode.window.showInformationMessage('🚀 Refined prompt sent to chat!');
+      } catch (error) {
+        // Fallback: copy to clipboard if sending fails
+        await vscode.env.clipboard.writeText(text);
+        vscode.window.showInformationMessage('📋 Copied to clipboard (chat not available). Paste to use!');
+      }
+    })
+  );
+
   // Copy refined prompt
   context.subscriptions.push(
     vscode.commands.registerCommand('promptiply.copyLastRefinement', async (text: string) => {

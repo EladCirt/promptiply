@@ -14,6 +14,7 @@ All notable changes to the "Promptiply" extension will be documented in this fil
   - Makes it easy to see the improvement
 
 - **🔄 Quick Actions**: Powerful new buttons after refinement
+  - 🚀 **Send Refined to Chat** - Instantly send refined prompt to chat (NO COPYING!)
   - 📋 Copy Refined - Copy the refined prompt
   - 📄 Copy Original - Copy your original prompt
   - 🔄 Refine with Different Profile - Quick profile switching
