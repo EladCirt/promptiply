@@ -53,7 +53,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // Initialize chat participant (for in-chat refinement)
   const chatParticipant = new PromptiplyChat(engine, profileManager, historyManager);
   context.subscriptions.push(chatParticipant.register());
-  registerChatCommands(context);
+  registerChatCommands(context, engine, profileManager, historyManager);
 
   // Register commands
   context.subscriptions.push(

@@ -2,6 +2,53 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.4.2] - 2025-01-08
+
+### Enhanced Chat Experience 🎨
+
+**Major Improvements to @promptiply chat participant:**
+
+- **📊 Before/After Comparison**: Now shows original and refined prompts side-by-side
+  - Word and character counts for both
+  - Visual enhancement stats ("+X words, +Y characters")
+  - Makes it easy to see the improvement
+
+- **🔄 Quick Actions**: Powerful new buttons after refinement
+  - 📋 Copy Refined - Copy the refined prompt
+  - 📄 Copy Original - Copy your original prompt
+  - 🔄 Refine with Different Profile - Quick profile switching
+  - 💎/💰 Try Premium/Economy - Toggle and re-refine instantly
+  - ⚙️ Settings - Quick access to configuration
+
+- **⚡ Slash Commands**: New quick commands
+  - `@promptiply /help` - Show usage guide
+  - `@promptiply /profile` - Choose profile interactively
+
+- **🎯 Better Formatting**: Cleaner, more readable output
+  - Clear section separators
+  - Better emoji usage for quick scanning
+  - Improved metadata display
+  - Enhanced error messages with troubleshooting steps
+
+- **🔁 Interactive Workflow**: Click buttons to refine again
+  - Switch profiles without leaving chat
+  - Toggle economy/premium on the fly
+  - No need to retype your prompt
+
+### Example Output
+
+```
+@promptiply help me debug this error
+```
+
+**Returns:**
+- 📝 Original Prompt (with stats)
+- ✨ Refined Prompt (with stats)
+- 📊 Enhancement stats
+- 👤 Profile • ⚙️ Mode • 💰 Economy • 🎯 Tokens
+- 🏷️ Detected topics
+- Quick action buttons
+
 ## [0.4.1] - 2025-01-08
 
 ### Chat Participant Integration ⚡
@@ -13,15 +60,6 @@ All notable changes to the "Promptiply" extension will be documented in this fil
   - One-click copy button for refined result
   - Automatic history tracking
   - Works seamlessly with existing profile system
-
-### How to Use
-
-In any VSCode chat interface:
-```
-@promptiply make a function that sorts arrays
-```
-
-Promptiply will refine your prompt and display the result in the chat with all the details!
 
 ## [0.4.0] - 2025-01-08
 
