@@ -94,9 +94,11 @@ export class PromptiplyChat {
 
           if (recommendation.profile && recommendation.confidence > 0.35) {
             this.log('✓ Showing recommendation in chat (confidence > 35%)');
+            this.log('⏸ Pausing refinement - waiting for user decision');
 
             stream.markdown(`💡 **Recommended Profile:** ${recommendation.profile.name}\n`);
             stream.markdown(`*${recommendation.reason}* (${Math.round(recommendation.confidence * 100)}% confidence)\n\n`);
+            stream.markdown(`**Choose an option:**\n\n`);
 
             stream.button({
               command: 'promptiply.chatRefineWithSpecificProfile',
@@ -104,7 +106,19 @@ export class PromptiplyChat {
               arguments: [prompt, recommendation.profile.id]
             });
 
+            stream.markdown('  ');
+
+            stream.button({
+              command: 'promptiply.chatRefineWithNoProfile',
+              title: `⏭ Skip - Refine without profile`,
+              arguments: [prompt]
+            });
+
             stream.markdown('\n\n');
+            stream.markdown(`💡 *Tip: To disable recommendations, go to Settings and search for "promptiply recommendations"*\n`);
+
+            this.log('=====================================\n');
+            return; // Stop here - wait for user decision
           } else {
             this.log('✗ Not showing recommendation - confidence too low (needs > 35%)');
           }
@@ -396,6 +410,30 @@ export function registerChatCommands(
       vscode.commands.executeCommand('workbench.action.chat.open', {
         query: `@promptiply ${prompt}`
       });
+    })
+  );
+
+  // Refine without profile (skip recommendation)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('promptiply.chatRefineWithNoProfile', async (prompt: string) => {
+      // Temporarily disable recommendations
+      const config = vscode.workspace.getConfiguration('promptiply');
+      const wasEnabled = config.get<boolean>('recommendations.enabled', true);
+
+      await config.update('recommendations.enabled', false, vscode.ConfigurationTarget.Global);
+
+      // Set no profile
+      await profileManager.setActiveProfile(null);
+
+      // Trigger a new chat message with the prompt
+      await vscode.commands.executeCommand('workbench.action.chat.open', {
+        query: `@promptiply ${prompt}`
+      });
+
+      // Re-enable recommendations after a short delay (to allow the chat to process)
+      setTimeout(async () => {
+        await config.update('recommendations.enabled', wasEnabled, vscode.ConfigurationTarget.Global);
+      }, 2000);
     })
   );
 
