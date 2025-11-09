@@ -14,6 +14,7 @@ import { HistoryTreeViewProvider } from './history/treeViewProvider';
 import { WebviewPanelManager } from './ui/webviewPanel';
 import { TemplateManager } from './templates/manager';
 import { TemplateCommands } from './commands/templates';
+import { PromptiplyChat, registerChatCommands } from './chat/participant';
 
 let statusBarManager: StatusBarManager | undefined;
 let historyTreeView: HistoryTreeViewProvider | undefined;
@@ -48,6 +49,11 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('promptiply.history', historyTreeView)
   );
+
+  // Initialize chat participant (for in-chat refinement)
+  const chatParticipant = new PromptiplyChat(engine, profileManager, historyManager);
+  context.subscriptions.push(chatParticipant.register());
+  registerChatCommands(context);
 
   // Register commands
   context.subscriptions.push(

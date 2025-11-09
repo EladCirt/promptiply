@@ -4,7 +4,7 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 
 ## ✨ Features
 
-- **💬 AI Chat Integration (NEW!)**: Refine prompts for Copilot Chat, Cursor, Claude Code with `Cmd+Shift+Alt+R`
+- **💬 AI Chat Integration**: Type `@promptiply` in any VSCode chat to refine prompts instantly!
 - **🔮 Prompt Refinement**: Transform casual prompts into clear, structured requests
 - **👤 Customizable Profiles**: Tailor refinements to match your workflow (Technical Writer, Developer, etc.)
 - **📊 Smart Topic Tracking**: Profiles evolve based on your usage patterns
@@ -30,14 +30,20 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 ### 💬 For AI Chat Integration (NEW!)
 **Perfect for Copilot Chat, Cursor, Claude Code, and any AI chat interface!**
 
-**Method 1: Clipboard (Recommended)**
+**Method 1: Direct Chat Participant (⚡ EASIEST!)**
+1. In any VSCode chat (Copilot Chat, etc.), type `@promptiply` followed by your prompt
+2. Example: `@promptiply make a function that sorts arrays`
+3. Promptiply refines your prompt **instantly** in the chat
+4. Copy the refined version and use it!
+
+**Method 2: Clipboard**
 1. Type/paste your prompt in the AI chat
 2. **Select and copy** your prompt (`Cmd+C`)
 3. Press `Cmd+Shift+Alt+R` (or Command Palette → "Refine from Clipboard")
 4. Review refined prompt and click "Copy to Clipboard"
 5. **Paste** into AI chat (`Cmd+V`)
 
-**Method 2: Input Box**
+**Method 3: Input Box**
 1. Press `Cmd+Alt+R` (or Command Palette → "Refine from Input Box")
 2. Type or paste your prompt in the input box
 3. Press Enter
@@ -47,8 +53,9 @@ Refine your AI prompts for better results with Copilot, Claude Code, Cursor, and
 **Why this is awesome:**
 - ✨ Refine prompts **without leaving your AI chat**
 - 🚀 Works with **any AI tool** (Copilot, Cursor, Claude, Continue, etc.)
-- ⚡ Super fast workflow: Copy → Refine → Paste
+- ⚡ Super fast workflow with chat participant: Just type `@promptiply`!
 - 🎯 Same powerful profile system and topic tracking
+- 📋 One-click copy buttons in chat responses
 
 ## 📋 Requirements
 

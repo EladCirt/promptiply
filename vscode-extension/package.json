@@ -2,7 +2,7 @@
   "name": "promptiply",
   "displayName": "Promptiply",
   "description": "Refine your AI prompts for better results with Copilot, Claude Code, and more. Supports customizable profiles with smart topic tracking.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "publisher": "promptiply",
   "icon": "media/icon.png",
   "repository": {
@@ -223,6 +223,20 @@
         }
       ]
     },
+    "chatParticipants": [
+      {
+        "id": "promptiply.refine",
+        "name": "promptiply",
+        "description": "Refine your prompts for better AI responses",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "refine",
+            "description": "Refine a prompt to make it clearer and more effective"
+          }
+        ]
+      }
+    ],
     "configuration": {
       "title": "Promptiply",
       "properties": {

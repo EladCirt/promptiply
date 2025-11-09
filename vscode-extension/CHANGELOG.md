@@ -2,6 +2,27 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.4.1] - 2025-01-08
+
+### Chat Participant Integration ⚡
+
+- **🤖 @promptiply Chat Participant**: Refine prompts directly in any VSCode chat!
+  - Type `@promptiply <your prompt>` in Copilot Chat or any VSCode chat
+  - Get refined prompts instantly without copying/pasting
+  - Shows metadata (profile, mode, tokens used, topics)
+  - One-click copy button for refined result
+  - Automatic history tracking
+  - Works seamlessly with existing profile system
+
+### How to Use
+
+In any VSCode chat interface:
+```
+@promptiply make a function that sorts arrays
+```
+
+Promptiply will refine your prompt and display the result in the chat with all the details!
+
 ## [0.4.0] - 2025-01-08
 
 ### Major Features 🎉
