@@ -35,9 +35,9 @@ This is a major feature release that transforms how you interact with profiles t
 - **Color-coded states** - Error states highlighted in red
 - **Spinning icon** - Animated sync indicator during operation
 
-### ⭐ Built-in Profile Templates
+### ⭐ 9 Professional Profiles Pre-Installed
 
-9 professional pre-configured profiles ready to use:
+**All users now get 9 professional profiles by default on first install:**
 
 1. **Backend Developer** - Server-side, APIs, databases, microservices
 2. **Frontend Developer** - UI/UX, React, Vue, responsive design
@@ -50,11 +50,11 @@ This is a major feature release that transforms how you interact with profiles t
 9. **Security Engineer** - Security, pentesting, secure coding
 
 **Features:**
-- One-click installation via Command Palette
+- **Automatically installed** on first use - no manual setup required!
 - Professionally crafted personas and guidelines
-- Pre-loaded with relevant topics
-- Overwrite protection with confirmation
-- Optional activation after install
+- Pre-loaded with relevant topics for each specialty
+- Ready to use immediately after install
+- Can still manually install/reinstall via Command Palette
 
 ### 🎨 UI/UX Improvements
 
