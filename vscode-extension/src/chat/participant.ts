@@ -76,9 +76,7 @@ export class PromptiplyChat {
         const recommendConfig = vscode.workspace.getConfiguration('promptiply');
         const showRecommendations = recommendConfig.get<boolean>('recommendations.enabled', true);
 
-        // Show output channel for debugging
-        PromptiplyChat.outputChannel.show(true);
-
+        // Log to output channel (but don't auto-show it)
         this.log('=== Profile Recommendation System ===');
         this.log(`Recommendations enabled: ${showRecommendations}`);
         this.log(`Skip flag: ${PromptiplyChat.skipNextRecommendation}`);
