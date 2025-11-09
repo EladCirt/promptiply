@@ -26,6 +26,15 @@ This is a major feature release that transforms how you interact with profiles t
 - **Smart reasons** - Each recommendation explains why it was suggested
 - **Better UI** - Clean, organized display with all options visible
 
+### 🔄 Enhanced Browser Extension Integration
+
+- **Compatible sync file format** - Unified format between VSCode and Chrome extensions
+- **VSCode sync format support in Chrome** - Chrome extension now imports/exports VSCode sync format
+- **Export for VSCode option** - New checkbox in Chrome extension export modal
+- **Comprehensive validation** - Both extensions validate sync file integrity
+- **Smart merge logic** - Conflict resolution based on profile usage count
+- **Detailed sync notifications** - Clear feedback with profile counts and active profile info
+
 ### 📊 Sync Status Bar Indicator
 
 - **Visual sync status** - See sync state at a glance in status bar
@@ -34,6 +43,7 @@ This is a major feature release that transforms how you interact with profiles t
 - **Auto-hide when disabled** - Only shows when sync is active
 - **Color-coded states** - Error states highlighted in red
 - **Spinning icon** - Animated sync indicator during operation
+- **Integrated with sync operations** - Automatically updates during export/import/merge
 
 ### ⭐ 9 Professional Profiles Pre-Installed
 
@@ -67,6 +77,15 @@ This is a major feature release that transforms how you interact with profiles t
 ### 📝 New Commands
 
 - `Promptiply: Install Built-in Profile Template` - Browse and install professional profiles
+- `Promptiply: Reset Profiles to Defaults` - Reset to the 9 professional profiles
+
+### 📚 Documentation
+
+- **SYNC_INTEGRATION.md** - Comprehensive guide for profile sync between VSCode and Chrome
+  - Step-by-step setup instructions
+  - Workflow examples for all sync scenarios
+  - Troubleshooting guide
+  - Best practices and tips
 
 ### 🔧 Technical Improvements
 

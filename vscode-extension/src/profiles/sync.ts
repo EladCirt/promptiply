@@ -6,12 +6,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ProfileManager } from './manager';
+import { SyncStatusBarManager } from '../ui/syncStatusBar';
 
 export class ProfileSyncManager {
   private context: vscode.ExtensionContext;
   private profileManager: ProfileManager;
   private watcher: vscode.FileSystemWatcher | undefined;
   private syncFilePath: string;
+  private statusBarManager: SyncStatusBarManager | undefined;
 
   constructor(context: vscode.ExtensionContext, profileManager: ProfileManager) {
     this.context = context;
@@ -28,6 +30,13 @@ export class ProfileSyncManager {
       const homeDir = process.env.HOME || process.env.USERPROFILE || '';
       this.syncFilePath = path.join(homeDir, '.promptiply-profiles.json');
     }
+  }
+
+  /**
+   * Set the status bar manager for sync status updates
+   */
+  setStatusBarManager(statusBarManager: SyncStatusBarManager): void {
+    this.statusBarManager = statusBarManager;
   }
 
   /**
@@ -73,10 +82,21 @@ export class ProfileSyncManager {
 
   /**
    * Export profiles to sync file
+   * Uses Chrome extension's native format: {list, activeProfileId}
    */
   async exportToSyncFile(): Promise<void> {
     try {
-      const json = await this.profileManager.exportProfiles();
+      this.statusBarManager?.setSyncing();
+
+      const config = await this.profileManager.getProfiles();
+
+      // Use Chrome extension's storage format
+      const syncData = {
+        list: config.list,
+        activeProfileId: config.activeProfileId,
+      };
+
+      const json = JSON.stringify(syncData, null, 2);
 
       // Ensure directory exists
       const dir = path.dirname(this.syncFilePath);
@@ -87,33 +107,110 @@ export class ProfileSyncManager {
       // Write to file
       fs.writeFileSync(this.syncFilePath, json, 'utf-8');
 
+      this.statusBarManager?.setSynced();
+
+      const profileCount = config.list.length;
+      const activeProfile = config.list.find(p => p.id === config.activeProfileId);
+
       vscode.window.showInformationMessage(
-        `Profiles exported to: ${this.syncFilePath}`
+        `✅ Exported ${profileCount} profile${profileCount !== 1 ? 's' : ''} to sync file${activeProfile ? ` (active: ${activeProfile.name})` : ''}`
       );
     } catch (error: any) {
-      vscode.window.showErrorMessage(`Export failed: ${error.message}`);
+      this.statusBarManager?.setError();
+      vscode.window.showErrorMessage(`❌ Export failed: ${error.message}`);
+      throw error;
     }
   }
 
   /**
    * Import profiles from sync file
+   * Reads Chrome extension's native format: {list, activeProfileId}
    */
   async importFromSyncFile(): Promise<void> {
     try {
+      this.statusBarManager?.setSyncing();
+
       if (!fs.existsSync(this.syncFilePath)) {
-        vscode.window.showWarningMessage('Sync file not found');
+        vscode.window.showWarningMessage('❌ Sync file not found');
+        this.statusBarManager?.setError();
         return;
       }
 
       const json = fs.readFileSync(this.syncFilePath, 'utf-8');
-      const count = await this.profileManager.importProfiles(json);
+      const syncData = JSON.parse(json);
+
+      // Validate format
+      if (!this.validateSyncData(syncData)) {
+        throw new Error('Invalid sync file format. Expected {list: [...], activeProfileId: ...}');
+      }
+
+      // Import profiles
+      const localConfig = await this.profileManager.getProfiles();
+      const newProfiles = [...syncData.list];
+
+      // Update local storage
+      await this.profileManager.saveProfiles({
+        list: newProfiles,
+        activeProfileId: syncData.activeProfileId,
+      });
+
+      this.statusBarManager?.setSynced();
+
+      const activeProfile = newProfiles.find(p => p.id === syncData.activeProfileId);
 
       vscode.window.showInformationMessage(
-        `Imported ${count} profile${count !== 1 ? 's' : ''} from sync file`
+        `✅ Imported ${newProfiles.length} profile${newProfiles.length !== 1 ? 's' : ''} from sync file${activeProfile ? ` (active: ${activeProfile.name})` : ''}`
       );
     } catch (error: any) {
-      vscode.window.showErrorMessage(`Import failed: ${error.message}`);
+      this.statusBarManager?.setError();
+      vscode.window.showErrorMessage(`❌ Import failed: ${error.message}`);
+      throw error;
     }
+  }
+
+  /**
+   * Validate sync data format
+   */
+  private validateSyncData(data: any): boolean {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+
+    // Must have list array
+    if (!Array.isArray(data.list)) {
+      return false;
+    }
+
+    // activeProfileId can be null or string
+    if (data.activeProfileId !== null && typeof data.activeProfileId !== 'string') {
+      return false;
+    }
+
+    // Validate each profile has required fields
+    for (const profile of data.list) {
+      if (!profile || typeof profile !== 'object') {
+        return false;
+      }
+
+      if (!profile.id || !profile.name || !profile.persona || !profile.tone) {
+        return false;
+      }
+
+      if (!Array.isArray(profile.styleGuidelines)) {
+        return false;
+      }
+
+      // Validate evolving_profile structure
+      if (!profile.evolving_profile || typeof profile.evolving_profile !== 'object') {
+        return false;
+      }
+
+      if (!Array.isArray(profile.evolving_profile.topics)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -167,9 +264,12 @@ export class ProfileSyncManager {
 
   /**
    * Merge profiles from sync file with local profiles
+   * Uses Chrome extension's format with smart conflict resolution
    */
   private async mergeProfiles(): Promise<void> {
     try {
+      this.statusBarManager?.setSyncing();
+
       if (!fs.existsSync(this.syncFilePath)) {
         vscode.window.showWarningMessage('Sync file not found. Creating new one...');
         await this.exportToSyncFile();
@@ -178,54 +278,78 @@ export class ProfileSyncManager {
 
       // Read sync file
       const json = fs.readFileSync(this.syncFilePath, 'utf-8');
-      const syncProfiles = JSON.parse(json);
+      const syncData = JSON.parse(json);
+
+      // Validate format
+      if (!this.validateSyncData(syncData)) {
+        throw new Error('Invalid sync file format');
+      }
 
       // Get local profiles
       const localConfig = await this.profileManager.getProfiles();
 
-      // Merge logic: use most recent version of each profile
+      // Merge logic: use most recent version of each profile (based on usageCount)
       const merged = new Map();
 
       // Add all local profiles
       for (const profile of localConfig.list) {
-        merged.set(profile.id, profile);
+        merged.set(profile.id, { profile, source: 'local' });
       }
 
       // Add/update from sync file
       let added = 0;
       let updated = 0;
+      let kept = 0;
 
-      for (const syncProfile of syncProfiles) {
+      for (const syncProfile of syncData.list) {
         if (merged.has(syncProfile.id)) {
           // Profile exists - check which is newer
-          const local = merged.get(syncProfile.id);
+          const { profile: local } = merged.get(syncProfile.id)!;
           const localUsage = local.evolving_profile?.usageCount || 0;
           const syncUsage = syncProfile.evolving_profile?.usageCount || 0;
 
           if (syncUsage > localUsage) {
-            merged.set(syncProfile.id, syncProfile);
+            merged.set(syncProfile.id, { profile: syncProfile, source: 'sync' });
             updated++;
+          } else {
+            kept++;
           }
         } else {
           // New profile from sync
-          merged.set(syncProfile.id, syncProfile);
+          merged.set(syncProfile.id, { profile: syncProfile, source: 'sync' });
           added++;
         }
       }
 
       // Save merged profiles
-      const mergedArray = Array.from(merged.values());
-      const mergedJson = JSON.stringify(mergedArray, null, 2);
+      const mergedList = Array.from(merged.values()).map(({ profile }) => profile);
+
+      // Determine active profile: prefer sync if available and valid
+      let activeProfileId = localConfig.activeProfileId;
+      if (syncData.activeProfileId && merged.has(syncData.activeProfileId)) {
+        activeProfileId = syncData.activeProfileId;
+      }
 
       // Update both local and sync file
-      await this.profileManager.importProfiles(mergedJson);
-      fs.writeFileSync(this.syncFilePath, mergedJson, 'utf-8');
+      const mergedConfig = {
+        list: mergedList,
+        activeProfileId,
+      };
+
+      await this.profileManager.saveProfiles(mergedConfig);
+      fs.writeFileSync(this.syncFilePath, JSON.stringify(mergedConfig, null, 2), 'utf-8');
+
+      this.statusBarManager?.setSynced();
+
+      const activeProfile = mergedList.find(p => p.id === activeProfileId);
 
       vscode.window.showInformationMessage(
-        `Sync complete! Added: ${added}, Updated: ${updated}`
+        `✅ Sync complete! ${mergedList.length} profiles (${added} added, ${updated} updated, ${kept} kept local)${activeProfile ? ` • Active: ${activeProfile.name}` : ''}`
       );
     } catch (error: any) {
-      vscode.window.showErrorMessage(`Merge failed: ${error.message}`);
+      this.statusBarManager?.setError();
+      vscode.window.showErrorMessage(`❌ Merge failed: ${error.message}`);
+      throw error;
     }
   }
 }

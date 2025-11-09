@@ -68,6 +68,9 @@ export async function activate(context: vscode.ExtensionContext) {
   await syncStatusBar.initialize();
   context.subscriptions.push(syncStatusBar);
 
+  // Connect sync manager with status bar for real-time updates
+  syncManager.setStatusBarManager(syncStatusBar);
+
   // Enable sync if configured
   const syncConfig = vscode.workspace.getConfiguration('promptiply');
   if (syncConfig.get<boolean>('sync.enabled', false)) {

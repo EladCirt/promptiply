@@ -322,8 +322,8 @@
   function parseImportEnvelope(data) {
     try {
       const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-      
-      // Handle versioned envelope
+
+      // Handle versioned envelope (Chrome extension export format)
       if (parsed.schemaVersion !== undefined) {
         if (parsed.schemaVersion !== SCHEMA_VERSION) {
           throw new Error(`Unsupported schema version: ${parsed.schemaVersion}. Expected ${SCHEMA_VERSION}.`);
@@ -333,12 +333,26 @@
         }
         return parsed.profiles;
       }
-      
+
+      // VSCode sync file format: {list: [...], activeProfileId: ...}
+      if (parsed.list !== undefined && Array.isArray(parsed.list)) {
+        console.log('[promptiply] Detected VSCode sync file format');
+        // Also update activeProfileId if present
+        if (parsed.activeProfileId) {
+          chrome.storage.sync.get([STORAGE_PROFILES], (data) => {
+            const current = normalizeProfilesState(data[STORAGE_PROFILES]);
+            current.activeProfileId = parsed.activeProfileId;
+            chrome.storage.sync.set({ [STORAGE_PROFILES]: current });
+          });
+        }
+        return parsed.list;
+      }
+
       // Legacy format: array directly
       if (Array.isArray(parsed)) {
         return parsed;
       }
-      
+
       throw new Error('Invalid import format');
     } catch (e) {
       throw new Error(`Failed to parse import data: ${e.message}`);
@@ -1433,6 +1447,15 @@
                 </div>
               `).join('')}
             </div>
+            <div class="export-format-option" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
+              <input type="checkbox" id="export-vscode-format-checkbox" />
+              <label for="export-vscode-format-checkbox">
+                <strong>Export for VSCode Sync</strong>
+                <span class="muted modal-text-muted-small" style="display: block; margin-left: 20px;">
+                  Use VSCode extension's sync file format (saves as promptiply-vscode-sync.json)
+                </span>
+              </label>
+            </div>
           </div>
           <div class="actions actions-space-between actions-top-margin">
             <button id="export-cancel">Cancel</button>
@@ -1485,11 +1508,11 @@
           e.stopPropagation();
           const selectedIds = Array.from(modal.querySelectorAll('.export-profile-item input[type="checkbox"]:checked'))
             .map(cb => cb.value);
-          
+
           if (selectedIds.length === 0) {
             const existingError = modal.querySelector('.export-error-message');
             if (existingError) existingError.remove();
-            
+
             const statusEl = document.createElement('p');
             statusEl.className = 'muted modal-text-muted-small export-error-message';
             statusEl.textContent = 'Please select at least one profile to export';
@@ -1499,22 +1522,42 @@
             }
             return;
           }
-          
+
           const selectedProfiles = profiles.list.filter(p => selectedIds.includes(p.id));
-          const envelope = createExportEnvelope(selectedProfiles);
-          const json = JSON.stringify(envelope, null, 2);
+          const vscodeFormatCheckbox = modal.querySelector('#export-vscode-format-checkbox');
+          const useVSCodeFormat = vscodeFormatCheckbox && vscodeFormatCheckbox.checked;
+
+          let json, filename;
+
+          if (useVSCodeFormat) {
+            // VSCode sync format: {list, activeProfileId}
+            const syncData = {
+              list: selectedProfiles,
+              activeProfileId: profiles.activeProfileId
+            };
+            json = JSON.stringify(syncData, null, 2);
+            filename = 'promptiply-vscode-sync.json';
+            console.log('[promptiply] Exporting in VSCode sync format');
+          } else {
+            // Chrome extension envelope format
+            const envelope = createExportEnvelope(selectedProfiles);
+            json = JSON.stringify(envelope, null, 2);
+            filename = `promptiply-profiles-${new Date().toISOString().split('T')[0]}.json`;
+            console.log('[promptiply] Exporting in Chrome extension format');
+          }
+
           const blob = new Blob([json], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `promptiply-profiles-${new Date().toISOString().split('T')[0]}.json`;
+          a.download = filename;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-          
+
           modal.remove();
-          showToast(`Exported ${selectedProfiles.length} profile(s)`);
+          showToast(`Exported ${selectedProfiles.length} profile(s)${useVSCodeFormat ? ' (VSCode format)' : ''}`);
           console.log('[promptiply] Exported', selectedProfiles.length, 'profiles');
         });
       }
