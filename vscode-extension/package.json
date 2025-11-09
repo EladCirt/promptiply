@@ -2,7 +2,7 @@
   "name": "promptiply",
   "displayName": "Promptiply",
   "description": "Refine your AI prompts for better results with Copilot, Claude Code, and more. Supports customizable profiles with smart topic tracking.",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "publisher": "promptiply",
   "icon": "media/icon.png",
   "repository": {
@@ -152,6 +152,30 @@
         "title": "Refresh History",
         "category": "Promptiply",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "promptiply.enableSync",
+        "title": "Enable Profile Sync",
+        "category": "Promptiply",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "promptiply.disableSync",
+        "title": "Disable Profile Sync",
+        "category": "Promptiply",
+        "icon": "$(sync-ignored)"
+      },
+      {
+        "command": "promptiply.syncNow",
+        "title": "Sync Profiles Now",
+        "category": "Promptiply",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "promptiply.setSyncPath",
+        "title": "Set Sync File Path",
+        "category": "Promptiply",
+        "icon": "$(file)"
       }
     ],
     "keybindings": [
@@ -355,6 +379,21 @@
           "type": "number",
           "default": 100,
           "description": "Maximum number of history entries to keep"
+        },
+        "promptiply.recommendations.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show AI-powered profile recommendations in chat"
+        },
+        "promptiply.sync.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable automatic profile sync with browser extension"
+        },
+        "promptiply.sync.filePath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path for profile sync file (leave empty for default: ~/.promptiply-profiles.json)"
         }
       }
     }

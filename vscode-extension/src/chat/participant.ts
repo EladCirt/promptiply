@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { RefinementEngine } from '../refinement/engine';
 import { ProfileManager } from '../profiles/manager';
 import { HistoryManager } from '../history/manager';
+import { ProfileRecommender } from '../profiles/recommender';
 
 export class PromptiplyChat {
   private engine: RefinementEngine;
@@ -53,11 +54,35 @@ export class PromptiplyChat {
         }
 
         // Show that we're working
-        stream.progress('Refining your prompt...');
+        stream.progress('Analyzing your prompt...');
 
         // Get configuration
         const config = RefinementEngine.getConfig();
-        const profile = await this.profileManager.getActiveProfile();
+        let profile = await this.profileManager.getActiveProfile();
+
+        // Check if recommendations are enabled and no profile is active
+        const recommendConfig = vscode.workspace.getConfiguration('promptiply');
+        const showRecommendations = recommendConfig.get<boolean>('recommendations.enabled', true);
+
+        if (showRecommendations && !profile) {
+          const profiles = await this.profileManager.getProfiles();
+          const recommendation = ProfileRecommender.recommend(prompt, profiles.list);
+
+          if (recommendation.profile && recommendation.confidence > 0.5) {
+            stream.markdown(`💡 **Recommended Profile:** ${recommendation.profile.name}\n`);
+            stream.markdown(`*${recommendation.reason}* (${Math.round(recommendation.confidence * 100)}% confidence)\n\n`);
+
+            stream.button({
+              command: 'promptiply.chatRefineWithSpecificProfile',
+              title: `✨ Use ${recommendation.profile.name}`,
+              arguments: [prompt, recommendation.profile.id]
+            });
+
+            stream.markdown('\n\n');
+          }
+        }
+
+        stream.progress('Refining your prompt...');
 
         // Calculate original stats
         const originalChars = prompt.length;

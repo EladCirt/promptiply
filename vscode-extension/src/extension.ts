@@ -15,9 +15,11 @@ import { WebviewPanelManager } from './ui/webviewPanel';
 import { TemplateManager } from './templates/manager';
 import { TemplateCommands } from './commands/templates';
 import { PromptiplyChat, registerChatCommands } from './chat/participant';
+import { ProfileSyncManager } from './profiles/sync';
 
 let statusBarManager: StatusBarManager | undefined;
 let historyTreeView: HistoryTreeViewProvider | undefined;
+let syncManager: ProfileSyncManager | undefined;
 
 /**
  * Extension activation
@@ -54,6 +56,15 @@ export async function activate(context: vscode.ExtensionContext) {
   const chatParticipant = new PromptiplyChat(engine, profileManager, historyManager);
   context.subscriptions.push(chatParticipant.register());
   registerChatCommands(context, engine, profileManager, historyManager);
+
+  // Initialize profile sync manager
+  syncManager = new ProfileSyncManager(context, profileManager);
+
+  // Enable sync if configured
+  const syncConfig = vscode.workspace.getConfiguration('promptiply');
+  if (syncConfig.get<boolean>('sync.enabled', false)) {
+    await syncManager.enableSync();
+  }
 
   // Register commands
   context.subscriptions.push(
@@ -169,6 +180,53 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       'promptiply.refreshHistory',
       () => historyTreeView?.refresh()
+    ),
+
+    // Sync commands
+    vscode.commands.registerCommand(
+      'promptiply.enableSync',
+      async () => {
+        if (syncManager) {
+          await syncManager.enableSync();
+          const config = vscode.workspace.getConfiguration('promptiply');
+          await config.update('sync.enabled', true, vscode.ConfigurationTarget.Global);
+        }
+      }
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.disableSync',
+      async () => {
+        if (syncManager) {
+          await syncManager.disableSync();
+          const config = vscode.workspace.getConfiguration('promptiply');
+          await config.update('sync.enabled', false, vscode.ConfigurationTarget.Global);
+        }
+      }
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.syncNow',
+      async () => {
+        if (syncManager) {
+          await syncManager.syncNow();
+        }
+      }
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.setSyncPath',
+      async () => {
+        if (syncManager) {
+          const currentPath = syncManager.getSyncFilePath();
+          const newPath = await vscode.window.showInputBox({
+            prompt: 'Enter sync file path',
+            value: currentPath,
+            placeHolder: '~/.promptiply-profiles.json',
+          });
+
+          if (newPath) {
+            await syncManager.setSyncFilePath(newPath);
+          }
+        }
+      }
     ),
 
     // Settings commands

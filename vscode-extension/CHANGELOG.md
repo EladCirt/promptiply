@@ -2,6 +2,49 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.4.3] - 2025-01-09
+
+### AI-Powered Recommendations 🤖
+
+- **💡 Smart Profile Recommendations**: Get intelligent profile suggestions in chat
+  - Analyzes your prompt content and suggests the best profile
+  - Pattern matching for code, documentation, testing, and marketing prompts
+  - Keyword analysis based on profile personas and style guidelines
+  - Historical topic weighting for improved accuracy
+  - Shows confidence score and human-readable reason
+  - Click button to instantly apply recommended profile
+  - Only shows when confidence is above 50% and no active profile
+  - Enable/disable in settings: `promptiply.recommendations.enabled`
+
+### Cross-Platform Profile Sync 🔄
+
+- **📁 Browser Extension Sync**: Keep profiles in sync between VSCode and Chrome
+  - File-based synchronization using `~/.promptiply-profiles.json`
+  - Auto-sync: Watches for changes and updates automatically
+  - Manual sync: Three modes (Export, Import, Merge)
+  - Smart merge: Uses usage count to determine most recent version
+  - Customizable sync path in settings
+  - Commands:
+    - `Promptiply: Enable Profile Sync` - Turn on auto-sync
+    - `Promptiply: Disable Profile Sync` - Turn off auto-sync
+    - `Promptiply: Sync Profiles Now` - Manual sync with mode selection
+    - `Promptiply: Set Sync File Path` - Change sync file location
+  - Settings:
+    - `promptiply.sync.enabled` - Auto-sync on/off
+    - `promptiply.sync.filePath` - Custom sync file path
+
+### New Files
+
+- `src/profiles/recommender.ts` - AI recommendation engine
+- `src/profiles/sync.ts` - Profile synchronization manager
+
+### Improvements
+
+- Better chat integration with smart profile suggestions
+- Seamless workflow between VSCode and browser extension
+- No manual copying needed for profile sharing
+- Profiles stay in sync across platforms automatically
+
 ## [0.4.2] - 2025-01-08
 
 ### Enhanced Chat Experience 🎨
