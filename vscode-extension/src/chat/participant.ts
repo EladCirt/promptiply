@@ -7,6 +7,7 @@ import { RefinementEngine } from '../refinement/engine';
 import { ProfileManager } from '../profiles/manager';
 import { HistoryManager } from '../history/manager';
 import { ProfileRecommender } from '../profiles/recommender';
+import { RecommendationLearning } from '../profiles/recommendationLearning';
 
 export class PromptiplyChat {
   private engine: RefinementEngine;
@@ -15,6 +16,7 @@ export class PromptiplyChat {
   private participant: vscode.ChatParticipant | undefined;
   private static outputChannel: vscode.OutputChannel;
   public static skipNextRecommendation = false; // Flag to skip recommendation on next request
+  public static lastRecommendations: Array<{ profileId: string; profileName: string; confidence: number; prompt: string }> = []; // Store last recommendations for feedback
 
   constructor(
     engine: RefinementEngine,
@@ -92,26 +94,69 @@ export class PromptiplyChat {
           const profiles = await this.profileManager.getProfiles();
           this.log(`Available profiles: ${profiles.list.map(p => p.name).join(', ')}`);
 
-          const recommendation = ProfileRecommender.recommend(prompt, profiles.list);
-          this.log(`Recommendation result: ${recommendation.profile?.name || 'none'}`);
-          this.log(`Confidence: ${(recommendation.confidence * 100).toFixed(1)}%`);
-          this.log(`Reason: ${recommendation.reason}`);
+          // Get all recommendations and apply learning adjustments
+          const allRecommendations = ProfileRecommender.getAllRecommendations(prompt, profiles.list);
 
-          if (recommendation.profile && recommendation.confidence > 0.35) {
-            this.log('✓ Showing recommendation in chat (confidence > 35%)');
+          // Extract keywords for learning adjustment
+          const promptKeywords = prompt.toLowerCase()
+            .replace(/[^\w\s]/g, ' ')
+            .split(/\s+/)
+            .filter(w => w.length > 3)
+            .slice(0, 20);
+
+          // Apply learning-based confidence adjustments
+          const adjustedRecommendations = allRecommendations.map(rec => ({
+            ...rec,
+            originalConfidence: rec.confidence,
+            confidence: RecommendationLearning.adjustConfidence(
+              rec.profile.id,
+              rec.confidence,
+              promptKeywords
+            )
+          }));
+
+          // Sort by adjusted confidence
+          adjustedRecommendations.sort((a, b) => b.confidence - a.confidence);
+
+          // Take top 3
+          const topRecommendations = adjustedRecommendations.slice(0, 3);
+
+          this.log(`Top recommendations:`);
+          topRecommendations.forEach((rec, index) => {
+            this.log(`  ${index + 1}. ${rec.profile.name}: ${(rec.confidence * 100).toFixed(1)}% (original: ${(rec.originalConfidence * 100).toFixed(1)}%)`);
+          });
+
+          // Show if best recommendation is above threshold
+          if (topRecommendations.length > 0 && topRecommendations[0].confidence > 0.35) {
+            this.log('✓ Showing recommendations in chat (best confidence > 35%)');
             this.log('⏸ Pausing refinement - waiting for user decision');
 
-            stream.markdown(`💡 **Recommended Profile:** ${recommendation.profile.name}\n`);
-            stream.markdown(`*${recommendation.reason}* (${Math.round(recommendation.confidence * 100)}% confidence)\n\n`);
-            stream.markdown(`**Choose an option:**\n\n`);
+            // Store recommendations for feedback tracking
+            PromptiplyChat.lastRecommendations = topRecommendations.map(rec => ({
+              profileId: rec.profile.id,
+              profileName: rec.profile.name,
+              confidence: rec.confidence,
+              prompt
+            }));
 
-            stream.button({
-              command: 'promptiply.chatRefineWithSpecificProfile',
-              title: `✨ Use ${recommendation.profile.name}`,
-              arguments: [prompt, recommendation.profile.id]
+            stream.markdown(`💡 **Recommended Profiles** (powered by your preferences):\n\n`);
+
+            // Show top 3 recommendations
+            topRecommendations.forEach((rec, index) => {
+              const rank = ['🥇', '🥈', '🥉'][index] || '📌';
+              stream.markdown(`${rank} **${rec.profile.name}** - ${Math.round(rec.confidence * 100)}% confidence\n`);
+              stream.markdown(`   *${rec.reason}*\n\n`);
+
+              stream.button({
+                command: 'promptiply.chatRefineWithSpecificProfile',
+                title: `✨ Use ${rec.profile.name}`,
+                arguments: [prompt, rec.profile.id]
+              });
+
+              stream.markdown('  ');
             });
 
-            stream.markdown('  ');
+            stream.markdown('\n');
 
             stream.button({
               command: 'promptiply.chatRefineWithNoProfile',
@@ -120,12 +165,12 @@ export class PromptiplyChat {
             });
 
             stream.markdown('\n\n');
-            stream.markdown(`💡 *Tip: To disable recommendations, go to Settings and search for "promptiply recommendations"*\n`);
+            stream.markdown(`💡 *Tip: Your choices help improve future recommendations!*\n`);
 
             this.log('=====================================\n');
             return; // Stop here - wait for user decision
           } else {
-            this.log('✗ Not showing recommendation - confidence too low (needs > 35%)');
+            this.log('✗ Not showing recommendations - confidence too low (needs > 35%)');
             this.log('=====================================\n');
           }
         } else {
@@ -410,6 +455,18 @@ export function registerChatCommands(
   // Refine with specific profile
   context.subscriptions.push(
     vscode.commands.registerCommand('promptiply.chatRefineWithSpecificProfile', async (prompt: string, profileId: string | null) => {
+      // Record acceptance feedback
+      const recommendation = PromptiplyChat.lastRecommendations.find(r => r.profileId === profileId);
+      if (recommendation) {
+        await RecommendationLearning.recordFeedback(
+          recommendation.profileId,
+          recommendation.profileName,
+          recommendation.prompt,
+          recommendation.confidence,
+          true // accepted
+        );
+      }
+
       await profileManager.setActiveProfile(profileId);
 
       // Trigger a new chat message with the prompt
@@ -422,6 +479,17 @@ export function registerChatCommands(
   // Refine without profile (skip recommendation)
   context.subscriptions.push(
     vscode.commands.registerCommand('promptiply.chatRefineWithNoProfile', async (prompt: string) => {
+      // Record rejection feedback for all recommendations
+      for (const recommendation of PromptiplyChat.lastRecommendations) {
+        await RecommendationLearning.recordFeedback(
+          recommendation.profileId,
+          recommendation.profileName,
+          recommendation.prompt,
+          recommendation.confidence,
+          false // rejected
+        );
+      }
+
       // Set flag to skip next recommendation
       PromptiplyChat.skipNextRecommendation = true;
 

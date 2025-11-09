@@ -2,7 +2,7 @@
   "name": "promptiply",
   "displayName": "Promptiply",
   "description": "Refine your AI prompts for better results with Copilot, Claude Code, and more. Supports customizable profiles with smart topic tracking.",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "publisher": "promptiply",
   "icon": "media/icon.png",
   "repository": {
@@ -95,6 +95,12 @@
         "title": "View Active Profile",
         "category": "Promptiply",
         "icon": "$(info)"
+      },
+      {
+        "command": "promptiply.installBuiltInProfile",
+        "title": "Install Built-in Profile Template",
+        "category": "Promptiply",
+        "icon": "$(star)"
       },
       {
         "command": "promptiply.useTemplate",

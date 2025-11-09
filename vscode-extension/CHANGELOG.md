@@ -2,6 +2,87 @@
 
 All notable changes to the "Promptiply" extension will be documented in this file.
 
+## [0.5.0] - 2025-01-09
+
+### 🎉 Major Release - Smart Recommendations & Learning System
+
+This is a major feature release that transforms how you interact with profiles through AI-powered recommendations and learning.
+
+### 🧠 Recommendation Learning System
+
+- **Learns from your choices** - Tracks which profiles you accept or reject
+- **Improves over time** - Adjusts confidence scores based on your preferences
+- **Keyword tracking** - Remembers which keywords work best for each profile
+- **Acceptance rate analytics** - Shows which profiles you use most
+- **Automatic feedback collection** - No manual input needed
+- **Persistent storage** - Learns across sessions (stores up to 1000 recommendations)
+
+### 🎯 Multi-Profile Recommendations
+
+- **Show top 3 profiles** instead of just one
+- **Ranked with medals** - 🥇 Best match, 🥈 Second best, 🥉 Third best
+- **Confidence scores** - See how confident the system is (35%+ threshold)
+- **Learning-adjusted** - Scores improve based on your history
+- **Smart reasons** - Each recommendation explains why it was suggested
+- **Better UI** - Clean, organized display with all options visible
+
+### 📊 Sync Status Bar Indicator
+
+- **Visual sync status** - See sync state at a glance in status bar
+- **Real-time updates** - Shows "Syncing...", "Synced", or "Error"
+- **Click to sync** - Quick access to manual sync
+- **Auto-hide when disabled** - Only shows when sync is active
+- **Color-coded states** - Error states highlighted in red
+- **Spinning icon** - Animated sync indicator during operation
+
+### ⭐ Built-in Profile Templates
+
+9 professional pre-configured profiles ready to use:
+
+1. **Backend Developer** - Server-side, APIs, databases, microservices
+2. **Frontend Developer** - UI/UX, React, Vue, responsive design
+3. **DevOps Engineer** - CI/CD, Docker, Kubernetes, cloud infrastructure
+4. **Full Stack Developer** - Balanced frontend and backend
+5. **Technical Writer** - Documentation, tutorials, explanations
+6. **Data Scientist** - ML, data analysis, statistical modeling
+7. **Mobile Developer** - iOS, Android, React Native, Flutter
+8. **QA Engineer** - Testing, test automation, quality assurance
+9. **Security Engineer** - Security, pentesting, secure coding
+
+**Features:**
+- One-click installation via Command Palette
+- Professionally crafted personas and guidelines
+- Pre-loaded with relevant topics
+- Overwrite protection with confirmation
+- Optional activation after install
+
+### 🎨 UI/UX Improvements
+
+- More informative recommendation displays
+- Better feedback when accepting/rejecting profiles
+- Clearer sync status messaging
+- Professional profile templates interface
+- Improved logging for debugging
+
+### 📝 New Commands
+
+- `Promptiply: Install Built-in Profile Template` - Browse and install professional profiles
+
+### 🔧 Technical Improvements
+
+- New `RecommendationLearning` class for tracking feedback
+- Enhanced `ProfileRecommender` with learning integration
+- New `SyncStatusBarManager` for visual sync indication
+- Built-in profiles system with extensible architecture
+- Better error handling throughout
+- Performance optimizations for recommendation calculations
+
+### 🐛 Bug Fixes
+
+- Fixed sync commands to properly update status bar
+- Improved profile selection feedback
+- Better handling of recommendation edge cases
+
 ## [0.4.3] - 2025-01-09
 
 ### AI-Powered Recommendations 🤖

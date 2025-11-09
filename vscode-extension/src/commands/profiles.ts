@@ -4,6 +4,7 @@
 
 import * as vscode from 'vscode';
 import { ProfileManager } from '../profiles/manager';
+import { BUILTIN_PROFILES } from '../profiles/builtinProfiles';
 
 export class ProfileCommands {
   private profileManager: ProfileManager;
@@ -322,5 +323,69 @@ export class ProfileCommands {
         </body>
       </html>
     `;
+  }
+
+  /**
+   * Install a built-in profile template
+   */
+  async installBuiltInProfile(): Promise<void> {
+    const items = BUILTIN_PROFILES.map(template => ({
+      label: `$(star) ${template.name}`,
+      description: template.description,
+      detail: `Persona: ${template.profile.persona}`,
+      template
+    }));
+
+    const selected = await vscode.window.showQuickPick(items, {
+      placeHolder: 'Select a built-in profile to install',
+      matchOnDescription: true,
+      matchOnDetail: true,
+    });
+
+    if (!selected) {
+      return;
+    }
+
+    try {
+      // Check if profile with same name already exists
+      const existing = await this.profileManager.getProfiles();
+      const existingProfile = existing.list.find(p => p.name === selected.template.name);
+
+      if (existingProfile) {
+        const overwrite = await vscode.window.showWarningMessage(
+          `Profile "${selected.template.name}" already exists. Overwrite it?`,
+          { modal: true },
+          'Overwrite',
+          'Cancel'
+        );
+
+        if (overwrite !== 'Overwrite') {
+          return;
+        }
+
+        // Delete existing profile
+        await this.profileManager.deleteProfile(existingProfile.id);
+      }
+
+      // Install the profile
+      const profile = await this.profileManager.addProfile({
+        name: selected.template.profile.name,
+        persona: selected.template.profile.persona,
+        tone: selected.template.profile.tone,
+        styleGuidelines: selected.template.profile.styleGuidelines,
+      });
+
+      const makeActive = await vscode.window.showInformationMessage(
+        `✅ Profile "${selected.template.name}" installed!`,
+        'Make Active',
+        'OK'
+      );
+
+      if (makeActive === 'Make Active') {
+        await this.profileManager.setActiveProfile(profile.id);
+      }
+    } catch (error: any) {
+      vscode.window.showErrorMessage(`Failed to install profile: ${error.message}`);
+    }
   }
 }

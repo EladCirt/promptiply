@@ -16,10 +16,13 @@ import { TemplateManager } from './templates/manager';
 import { TemplateCommands } from './commands/templates';
 import { PromptiplyChat, registerChatCommands } from './chat/participant';
 import { ProfileSyncManager } from './profiles/sync';
+import { RecommendationLearning } from './profiles/recommendationLearning';
+import { SyncStatusBarManager } from './ui/syncStatusBar';
 
 let statusBarManager: StatusBarManager | undefined;
 let historyTreeView: HistoryTreeViewProvider | undefined;
 let syncManager: ProfileSyncManager | undefined;
+let syncStatusBar: SyncStatusBarManager | undefined;
 
 /**
  * Extension activation
@@ -60,11 +63,20 @@ export async function activate(context: vscode.ExtensionContext) {
   // Initialize profile sync manager
   syncManager = new ProfileSyncManager(context, profileManager);
 
+  // Initialize sync status bar
+  syncStatusBar = new SyncStatusBarManager(syncManager);
+  await syncStatusBar.initialize();
+  context.subscriptions.push(syncStatusBar);
+
   // Enable sync if configured
   const syncConfig = vscode.workspace.getConfiguration('promptiply');
   if (syncConfig.get<boolean>('sync.enabled', false)) {
     await syncManager.enableSync();
+    await syncStatusBar.updateStatus();
   }
+
+  // Initialize recommendation learning system
+  await RecommendationLearning.initialize(context);
 
   // Register commands
   context.subscriptions.push(
@@ -119,6 +131,13 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       'promptiply.viewProfile',
       () => profileCommands.viewProfile()
+    ),
+    vscode.commands.registerCommand(
+      'promptiply.installBuiltInProfile',
+      async () => {
+        await profileCommands.installBuiltInProfile();
+        await statusBarManager?.update();
+      }
     ),
 
     // Template commands
@@ -186,28 +205,41 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       'promptiply.enableSync',
       async () => {
-        if (syncManager) {
+        if (syncManager && syncStatusBar) {
+          syncStatusBar.setSyncing();
           await syncManager.enableSync();
           const config = vscode.workspace.getConfiguration('promptiply');
           await config.update('sync.enabled', true, vscode.ConfigurationTarget.Global);
+          syncStatusBar.setSynced();
+          syncStatusBar.show();
+          vscode.window.showInformationMessage('✅ Profile sync enabled');
         }
       }
     ),
     vscode.commands.registerCommand(
       'promptiply.disableSync',
       async () => {
-        if (syncManager) {
+        if (syncManager && syncStatusBar) {
           await syncManager.disableSync();
           const config = vscode.workspace.getConfiguration('promptiply');
           await config.update('sync.enabled', false, vscode.ConfigurationTarget.Global);
+          syncStatusBar.hide();
+          vscode.window.showInformationMessage('Profile sync disabled');
         }
       }
     ),
     vscode.commands.registerCommand(
       'promptiply.syncNow',
       async () => {
-        if (syncManager) {
-          await syncManager.syncNow();
+        if (syncManager && syncStatusBar) {
+          try {
+            syncStatusBar.setSyncing();
+            await syncManager.syncNow();
+            syncStatusBar.setSynced();
+            vscode.window.showInformationMessage('✅ Profiles synced successfully');
+          } catch (error) {
+            syncStatusBar.setError('Sync failed');
+          }
         }
       }
     ),
