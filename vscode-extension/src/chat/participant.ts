@@ -64,9 +64,17 @@ export class PromptiplyChat {
         const recommendConfig = vscode.workspace.getConfiguration('promptiply');
         const showRecommendations = recommendConfig.get<boolean>('recommendations.enabled', true);
 
+        console.log('[Promptiply] Recommendations enabled:', showRecommendations);
+        console.log('[Promptiply] Active profile:', profile?.name || 'none');
+
         if (showRecommendations && !profile) {
           const profiles = await this.profileManager.getProfiles();
+          console.log('[Promptiply] Available profiles:', profiles.list.map(p => p.name));
+
           const recommendation = ProfileRecommender.recommend(prompt, profiles.list);
+          console.log('[Promptiply] Recommendation:', recommendation.profile?.name || 'none',
+                      'Confidence:', recommendation.confidence,
+                      'Reason:', recommendation.reason);
 
           if (recommendation.profile && recommendation.confidence > 0.5) {
             stream.markdown(`💡 **Recommended Profile:** ${recommendation.profile.name}\n`);
@@ -79,7 +87,11 @@ export class PromptiplyChat {
             });
 
             stream.markdown('\n\n');
+          } else {
+            console.log('[Promptiply] Not showing recommendation - confidence too low or no match');
           }
+        } else {
+          console.log('[Promptiply] Skipping recommendations - disabled or profile active');
         }
 
         stream.progress('Refining your prompt...');
